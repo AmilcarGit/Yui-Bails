@@ -17,7 +17,7 @@ import type { MessageUpsertType, MessageUserReceiptUpdate, WAMessage, WAMessageK
 import type { ConnectionState, NewChatMessageCapInfo } from './State'
 
 // TODO: refactor this mess
-export type BaileysEventMap = {
+export type YuiEventMap = {
 	/** connection state has been updated -- WS closed, opened, connecting etc. */
 	'connection.update': Partial<ConnectionState>
 	/** credentials updated -- some metadata, keys or something */
@@ -169,11 +169,19 @@ export type BufferedEventData = {
 	groupUpdates: { [jid: string]: Partial<GroupMetadata> }
 }
 
-export type BaileysEvent = keyof BaileysEventMap
+export type YuiEvent = keyof YuiEventMap
 
-export interface BaileysEventEmitter {
-	on<T extends keyof BaileysEventMap>(event: T, listener: (arg: BaileysEventMap[T]) => void): void
-	off<T extends keyof BaileysEventMap>(event: T, listener: (arg: BaileysEventMap[T]) => void): void
-	removeAllListeners<T extends keyof BaileysEventMap>(event: T): void
-	emit<T extends keyof BaileysEventMap>(event: T, arg: BaileysEventMap[T]): boolean
+/** @deprecated alias de compatibilidad con Baileys, usa `YuiEventMap` */
+export type BaileysEventMap = YuiEventMap
+/** @deprecated alias de compatibilidad con Baileys, usa `YuiEvent` */
+export type BaileysEvent = YuiEvent
+
+export interface YuiEventEmitter {
+	on<T extends keyof YuiEventMap>(event: T, listener: (arg: YuiEventMap[T]) => void): void
+	off<T extends keyof YuiEventMap>(event: T, listener: (arg: YuiEventMap[T]) => void): void
+	removeAllListeners<T extends keyof YuiEventMap>(event: T): void
+	emit<T extends keyof YuiEventMap>(event: T, arg: YuiEventMap[T]): boolean
 }
+
+/** @deprecated alias de compatibilidad con Baileys, usa `YuiEventEmitter` */
+export type BaileysEventEmitter = YuiEventEmitter

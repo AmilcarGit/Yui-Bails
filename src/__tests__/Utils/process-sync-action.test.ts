@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import { proto } from '../../../WAProto/index.js'
-import type { BaileysEventEmitter, ChatMutation, Contact } from '../../Types'
+import type { YuiEventEmitter, ChatMutation, Contact } from '../../Types'
 import { LabelAssociationType } from '../../Types/LabelAssociation'
 import { processSyncAction } from '../../Utils/chat-utils'
 import type { ILogger } from '../../Utils/logger'
@@ -17,7 +17,7 @@ const createMockEventEmitter = () => {
 		on: jest.fn(),
 		off: jest.fn(),
 		removeAllListeners: jest.fn()
-	} as unknown as BaileysEventEmitter & { emittedEvents: typeof emittedEvents }
+	} as unknown as YuiEventEmitter & { emittedEvents: typeof emittedEvents }
 }
 
 const createMockLogger = (): ILogger =>

@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in the Baileys community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
+We as members, contributors, and leaders pledge to make participation in the Yui-Bails community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
@@ -26,7 +26,7 @@ Examples of unacceptable behavior:
 
 ## Project-Specific Conduct
 
-Baileys is a dual-use library. It can be used for legitimate automation, bots, and integrations, and it can be used for spam, stalkerware, scraping, and ToS-breaking automation. Contributions whose primary purpose is to enable abuse will be rejected. This includes but is not limited to:
+Yui-Bails is a dual-use library. It can be used for legitimate automation, bots, and integrations, and it can be used for spam, stalkerware, scraping, and ToS-breaking automation. Contributions whose primary purpose is to enable abuse will be rejected. This includes but is not limited to:
 
 - Bypassing WhatsApp's anti-spam, rate-limiting, or account-restriction mechanisms
 - Mass unsolicited messaging features
@@ -48,16 +48,16 @@ This project welcomes AI-assisted contributions. Most of us use them. The rules:
 4. **Test what the AI produced.** Run `yarn lint` and `yarn test` locally. AI tools confidently generate code that doesn't compile or doesn't pass existing tests — catch that before it hits CI.
 
 5. **Don't paste secrets into AI tools.** This includes:
-   - `baileys_auth_info/` and any other auth/session state — these contain Signal identity keys equivalent to long-lived credentials
+   - `yui_auth_info/` and any other auth/session state — these contain Signal identity keys equivalent to long-lived credentials
    - `.env` files, API tokens, signing keys
    - Real user phone numbers, message content, or contact lists from production systems
    Most AI providers retain prompts for some period; treat anything you paste as published.
 
 6. **Don't use AI to mass-generate issues, PRs, or comments.** Drive-by AI-generated PRs that "fix" non-bugs, add unnecessary tests, or reformat unrelated code waste maintainer time and will be closed without detailed review. If you're using an autonomous agent, supervise it.
 
-7. **Hallucinated protocol details are a security issue.** Baileys talks to a closed-source server. AI tools will confidently invent stanza shapes, attribute names, and error codes that don't exist. Verify against real captures, the existing test fixtures, or the WAProto definitions before submitting.
+7. **Hallucinated protocol details are a security issue.** Yui-Bails talks to a closed-source server. AI tools will confidently invent stanza shapes, attribute names, and error codes that don't exist. Verify against real captures, the existing test fixtures, or the WAProto definitions before submitting.
 
-8. **License-compatible output only.** If you use an AI tool that may surface code from incompatible licenses (GPL, AGPL, proprietary), don't submit that output. We can't accept it. Baileys is MIT.
+8. **License-compatible output only.** If you use an AI tool that may surface code from incompatible licenses (GPL, AGPL, proprietary), don't submit that output. We can't accept it. Yui-Bails is MIT.
 
 Following this policy doesn't slow you down — it just keeps the bar consistent between AI-assisted and hand-written contributions.
 
@@ -97,4 +97,4 @@ Maintainers will follow these Community Impact Guidelines in determining the con
 
 ## Attribution
 
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/), version 2.1, with project-specific and AI-policy sections added by the Baileys maintainers.
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/), version 2.1, with project-specific and AI-policy sections added by the Yui-Bails maintainers.

@@ -1,9 +1,9 @@
 import EventEmitter from 'events'
 import type { proto } from '../../WAProto/index.js'
 import type {
-	BaileysEvent,
-	BaileysEventEmitter,
-	BaileysEventMap,
+	YuiEvent,
+	YuiEventEmitter,
+	YuiEventMap,
 	BufferedEventData,
 	Chat,
 	ChatUpdate,
@@ -41,13 +41,13 @@ type BufferableEvent = (typeof BUFFERABLE_EVENT)[number]
  * this can make processing events extremely efficient -- since everything
  * can be done in a single transaction
  */
-type BaileysEventData = Partial<BaileysEventMap>
+type YuiEventData = Partial<YuiEventMap>
 
-const BUFFERABLE_EVENT_SET = new Set<BaileysEvent>(BUFFERABLE_EVENT)
+const BUFFERABLE_EVENT_SET = new Set<YuiEvent>(BUFFERABLE_EVENT)
 
-type BaileysBufferableEventEmitter = BaileysEventEmitter & {
+type YuiBufferableEventEmitter = YuiEventEmitter & {
 	/** Use to process events in a batch */
-	process(handler: (events: BaileysEventData) => void | Promise<void>): () => void
+	process(handler: (events: YuiEventData) => void | Promise<void>): () => void
 	/**
 	 * starts buffering events, call flush() to release them
 	 * */
@@ -70,7 +70,7 @@ type BaileysBufferableEventEmitter = BaileysEventEmitter & {
  * The event buffer logically consolidates different events into a single event
  * making the data processing more efficient.
  */
-export const makeEventBuffer = (logger: ILogger): BaileysBufferableEventEmitter => {
+export const makeEventBuffer = (logger: ILogger): YuiBufferableEventEmitter => {
 	const ev = new EventEmitter()
 	const historyCache = new Set<string>()
 
@@ -82,10 +82,10 @@ export const makeEventBuffer = (logger: ILogger): BaileysBufferableEventEmitter 
 	const MAX_HISTORY_CACHE_SIZE = 10000 // Limit the history cache size to prevent memory bloat
 	const BUFFER_TIMEOUT_MS = 30000 // 30 seconds
 
-	// take the generic event and fire it as a baileys event
-	ev.on('event', (map: BaileysEventData) => {
+	// take the generic event and fire it as a yui-bails event
+	ev.on('event', (map: YuiEventData) => {
 		for (const event in map) {
-			ev.emit(event, map[event as keyof BaileysEventMap])
+			ev.emit(event, map[event as keyof YuiEventMap])
 		}
 	})
 
@@ -162,7 +162,7 @@ export const makeEventBuffer = (logger: ILogger): BaileysBufferableEventEmitter 
 
 	return {
 		process(handler) {
-			const listener = async (map: BaileysEventData) => {
+			const listener = async (map: YuiEventData) => {
 				await handler(map)
 			}
 
@@ -171,11 +171,11 @@ export const makeEventBuffer = (logger: ILogger): BaileysBufferableEventEmitter 
 				ev.off('event', listener)
 			}
 		},
-		emit<T extends BaileysEvent>(event: BaileysEvent, evData: BaileysEventMap[T]) {
+		emit<T extends YuiEvent>(event: YuiEvent, evData: YuiEventMap[T]) {
 			// Check if this is a messages.upsert with a different type than what's buffered
 			// If so, flush the buffered messages first to avoid type overshadowing
 			if (event === 'messages.upsert') {
-				const { type } = evData as BaileysEventMap['messages.upsert']
+				const { type } = evData as YuiEventMap['messages.upsert']
 				const existingUpserts = Object.values(data.messageUpserts)
 				if (existingUpserts.length > 0) {
 					const bufferedType = existingUpserts[0]!.type
@@ -470,7 +470,7 @@ function append<E extends BufferableEvent>(
 
 			break
 		case 'contacts.update':
-			const contactUpdates = eventData as BaileysEventMap['contacts.update']
+			const contactUpdates = eventData as YuiEventMap['contacts.update']
 			for (const update of contactUpdates) {
 				const id = update.id!
 				// merge into prior upsert
@@ -486,7 +486,7 @@ function append<E extends BufferableEvent>(
 
 			break
 		case 'messages.upsert':
-			const { messages, type } = eventData as BaileysEventMap['messages.upsert']
+			const { messages, type } = eventData as YuiEventMap['messages.upsert']
 			for (const message of messages) {
 				const key = stringifyMessageKey(message.key)
 				let existing = data.messageUpserts[key]?.message
@@ -519,7 +519,7 @@ function append<E extends BufferableEvent>(
 
 			break
 		case 'messages.update':
-			const msgUpdates = eventData as BaileysEventMap['messages.update']
+			const msgUpdates = eventData as YuiEventMap['messages.update']
 			for (const { key, update } of msgUpdates) {
 				const keyStr = stringifyMessageKey(key)
 				const existing = data.historySets.messages[keyStr] || data.messageUpserts[keyStr]?.message
@@ -540,7 +540,7 @@ function append<E extends BufferableEvent>(
 
 			break
 		case 'messages.delete':
-			const deleteData = eventData as BaileysEventMap['messages.delete']
+			const deleteData = eventData as YuiEventMap['messages.delete']
 			if ('keys' in deleteData) {
 				const { keys } = deleteData
 				for (const key of keys) {
@@ -563,7 +563,7 @@ function append<E extends BufferableEvent>(
 
 			break
 		case 'messages.reaction':
-			const reactions = eventData as BaileysEventMap['messages.reaction']
+			const reactions = eventData as YuiEventMap['messages.reaction']
 			for (const { key, reaction } of reactions) {
 				const keyStr = stringifyMessageKey(key)
 				const existing = data.messageUpserts[keyStr]
@@ -577,7 +577,7 @@ function append<E extends BufferableEvent>(
 
 			break
 		case 'message-receipt.update':
-			const receipts = eventData as BaileysEventMap['message-receipt.update']
+			const receipts = eventData as YuiEventMap['message-receipt.update']
 			for (const { key, receipt } of receipts) {
 				const keyStr = stringifyMessageKey(key)
 				const existing = data.messageUpserts[keyStr]
@@ -591,7 +591,7 @@ function append<E extends BufferableEvent>(
 
 			break
 		case 'groups.update':
-			const groupUpdates = eventData as BaileysEventMap['groups.update']
+			const groupUpdates = eventData as YuiEventMap['groups.update']
 			for (const update of groupUpdates) {
 				const id = update.id!
 				const groupUpdate = data.groupUpdates[id] || {}
@@ -643,7 +643,7 @@ function append<E extends BufferableEvent>(
 }
 
 function consolidateEvents(data: BufferedEventData) {
-	const map: BaileysEventData = {}
+	const map: YuiEventData = {}
 
 	if (!data.historySets.empty) {
 		map['messaging-history.set'] = {

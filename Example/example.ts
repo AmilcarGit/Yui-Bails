@@ -38,7 +38,7 @@ const question = (text: string) => new Promise<string>((resolve) => rl.question(
 
 // start a connection
 const startSock = async() => {
-	const { state, saveCreds } = await useMultiFileAuthState('baileys_auth_info')
+	const { state, saveCreds } = await useMultiFileAuthState('yui_auth_info')
 	// NOTE: For unit testing purposes only
 	if (process.env.ADV_SECRET_KEY) {
 		state.creds.advSecretKey = process.env.ADV_SECRET_KEY

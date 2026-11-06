@@ -1,5 +1,5 @@
 import { proto } from '../../WAProto/index.js'
-import type { BaileysEventEmitter, BaileysEventMap, Contact } from '../Types'
+import type { YuiEventEmitter, YuiEventMap, Contact } from '../Types'
 import { isLidUser, isPnUser } from '../WABinary'
 import type { ILogger } from './logger'
 
@@ -10,7 +10,7 @@ export type ContactsUpsertResult = {
 
 export type LidMappingUpdateResult = {
 	event: 'lid-mapping.update'
-	data: BaileysEventMap['lid-mapping.update']
+	data: YuiEventMap['lid-mapping.update']
 }
 
 export type SyncActionResult = ContactsUpsertResult | LidMappingUpdateResult
@@ -64,7 +64,7 @@ export const processContactAction = (
 	return results
 }
 
-export const emitSyncActionResults = (ev: BaileysEventEmitter, results: SyncActionResult[]): void => {
+export const emitSyncActionResults = (ev: YuiEventEmitter, results: SyncActionResult[]): void => {
 	for (const result of results) {
 		if (result.event === 'contacts.upsert') {
 			ev.emit('contacts.upsert', result.data)

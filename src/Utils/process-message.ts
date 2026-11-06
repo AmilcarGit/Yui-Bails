@@ -2,7 +2,7 @@ import { Boom } from '@hapi/boom'
 import { proto } from '../../WAProto/index.js'
 import type {
 	AuthenticationCreds,
-	BaileysEventEmitter,
+	YuiEventEmitter,
 	CacheStore,
 	Chat,
 	GroupMetadata,
@@ -41,7 +41,7 @@ type ProcessMessageContext = {
 	placeholderResendCache?: CacheStore
 	creds: AuthenticationCreds
 	keyStore: SignalKeyStoreWithTransaction
-	ev: BaileysEventEmitter
+	ev: YuiEventEmitter
 	logger?: ILogger
 	options: RequestInit
 	signalRepository: SignalRepositoryWithLIDStore

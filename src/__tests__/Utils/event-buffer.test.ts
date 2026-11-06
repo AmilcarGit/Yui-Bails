@@ -1,4 +1,4 @@
-import type { BaileysEventMap } from '../../Types'
+import type { YuiEventMap } from '../../Types'
 import { makeEventBuffer } from '../../Utils/event-buffer'
 import type { ILogger } from '../../Utils/logger'
 
@@ -27,8 +27,8 @@ describe('event-buffer', () => {
 				}
 			]
 
-			const receivedEvents: BaileysEventMap['messaging-history.set'][] = []
-			ev.on('messaging-history.set', (data: BaileysEventMap['messaging-history.set']) => {
+			const receivedEvents: YuiEventMap['messaging-history.set'][] = []
+			ev.on('messaging-history.set', (data: YuiEventMap['messaging-history.set']) => {
 				receivedEvents.push(data)
 			})
 
@@ -70,8 +70,8 @@ describe('event-buffer', () => {
 				}
 			]
 
-			const receivedEvents: BaileysEventMap['messaging-history.set'][] = []
-			ev.on('messaging-history.set', (data: BaileysEventMap['messaging-history.set']) => {
+			const receivedEvents: YuiEventMap['messaging-history.set'][] = []
+			ev.on('messaging-history.set', (data: YuiEventMap['messaging-history.set']) => {
 				receivedEvents.push(data)
 			})
 
@@ -117,8 +117,8 @@ describe('event-buffer', () => {
 				}
 			]
 
-			const receivedEvents: BaileysEventMap['messaging-history.set'][] = []
-			ev.on('messaging-history.set', (data: BaileysEventMap['messaging-history.set']) => {
+			const receivedEvents: YuiEventMap['messaging-history.set'][] = []
+			ev.on('messaging-history.set', (data: YuiEventMap['messaging-history.set']) => {
 				receivedEvents.push(data)
 			})
 

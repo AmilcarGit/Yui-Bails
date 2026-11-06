@@ -1,6 +1,6 @@
 /**
- * Prints the russellxz-ultra-baileys banner once per process.
- * Set ULTRA_BAILEYS_NO_BANNER=1 to disable it.
+ * Prints the Yui-Bails banner once per process.
+ * Set YUI_BAILS_NO_BANNER=1 to disable it.
  */
 
 const ESC = '\x1b['
@@ -27,12 +27,12 @@ const gradientLine = (text: string, offset = 0) => {
 }
 
 /** version of this fork, shown in the banner */
-export const ULTRA_BAILEYS_VERSION = '7.0.0-rc13'
+export const YUI_BAILS_VERSION = '7.0.0-rc13'
 
 let printed = false
 
-export const printBanner = (version: string = ULTRA_BAILEYS_VERSION) => {
-	if (printed || process.env.ULTRA_BAILEYS_NO_BANNER) {
+export const printBanner = (version: string = YUI_BAILS_VERSION) => {
+	if (printed || (process.env.YUI_BAILS_NO_BANNER || process.env.ULTRA_BAILEYS_NO_BANNER)) {
 		return
 	}
 
@@ -45,8 +45,8 @@ export const printBanner = (version: string = ULTRA_BAILEYS_VERSION) => {
 		return ' '.repeat(Math.max(0, left)) + text + ' '.repeat(Math.max(0, width - visibleLength - left))
 	}
 
-	const title = 'R U S S E L L X Z'
-	const subtitle = '— u l t r a  b a i l e y s —'
+	const title = 'Y U I  -  B A I L S'
+	const subtitle = '— b o t s   d e   W h a t s A p p —'
 	const items = ['◆ modo turbo · baja latencia', '◆ botones nativos · listas · flows', '◆ consola limpia · cero ruido']
 
 	const edge = (ch: string) => paint(ch, 105)
@@ -85,7 +85,7 @@ export type WaVersionSource =
  * WhatsApp refuse to link a device.
  */
 export const printWaVersionNotice = ({ version, source }: { version: number[]; source: WaVersionSource }) => {
-	if (versionNoticePrinted || process.env.ULTRA_BAILEYS_NO_BANNER) {
+	if (versionNoticePrinted || (process.env.YUI_BAILS_NO_BANNER || process.env.ULTRA_BAILEYS_NO_BANNER)) {
 		return
 	}
 

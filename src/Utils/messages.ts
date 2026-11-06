@@ -667,7 +667,7 @@ export const generateWAMessageContent = async (
 		// the reply as "message not compatible with your version of WhatsApp" to
 		// everyone else in the chat. 'buttons' emits a classic ButtonsMessage whose
 		// taps reply with buttonsResponseMessage, which every client renders as text.
-		const format = btnContent.buttonsFormat || process.env.ULTRA_BAILEYS_BUTTONS_FORMAT || 'interactive'
+		const format = btnContent.buttonsFormat || process.env.YUI_BAILS_BUTTONS_FORMAT || process.env.ULTRA_BAILEYS_BUTTONS_FORMAT || 'interactive'
 
 		if (format === 'buttons') {
 			const buttonsMessage: proto.Message.IButtonsMessage = {

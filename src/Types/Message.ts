@@ -233,7 +233,7 @@ export type ButtonSpec = {
 	useWebview?: boolean
 	/** turns the button into a single-select dropdown with these sections */
 	sections?: any[]
-	/** classic Baileys compatibility: { buttonId, buttonText: { displayText }, type } */
+	/** classic Yui-Bails compatibility: { buttonId, buttonText: { displayText }, type } */
 	buttonId?: string
 	buttonText?: { displayText?: string | null } | null
 	type?: number
@@ -256,7 +256,7 @@ export type ButtonsMessageContent = {
 	 * - `buttons`: classic ButtonsMessage. Taps reply with `buttonsResponseMessage`,
 	 *   which every client renders as a normal text bubble.
 	 *
-	 * Defaults to the `ULTRA_BAILEYS_BUTTONS_FORMAT` env var when set.
+	 * Defaults to the `YUI_BAILS_BUTTONS_FORMAT` env var when set.
 	 */
 	buttonsFormat?: 'interactive' | 'buttons'
 	text?: string

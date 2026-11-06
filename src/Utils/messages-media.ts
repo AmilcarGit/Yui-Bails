@@ -12,7 +12,7 @@ import { URL } from 'url'
 import { proto } from '../../WAProto/index.js'
 import { DEFAULT_ORIGIN, MEDIA_HKDF_KEY_MAPPING, MEDIA_PATH_MAP, type MediaType } from '../Defaults'
 import type {
-	BaileysEventMap,
+	YuiEventMap,
 	DownloadableMessage,
 	MediaConnInfo,
 	MediaDecryptionKeyInfo,
@@ -950,7 +950,7 @@ export const encryptMediaRetryRequest = (key: WAMessageKey, mediaKey: Buffer | U
 export const decodeMediaRetryNode = (node: BinaryNode) => {
 	const rmrNode = getBinaryNodeChild(node, 'rmr')!
 
-	const event: BaileysEventMap['messages.media-update'][number] = {
+	const event: YuiEventMap['messages.media-update'][number] = {
 		key: {
 			id: node.attrs.id,
 			remoteJid: rmrNode.attrs.jid,

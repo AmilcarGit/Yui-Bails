@@ -13,7 +13,7 @@ export interface Contact {
 	username?: string
 	/** I have no idea */
 	verifiedName?: string
-	// Baileys Added
+	// Yui-Bails Added
 	/**
 	 * Url of the profile picture of the contact
 	 *

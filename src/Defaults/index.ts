@@ -71,7 +71,7 @@ export const DEFAULT_CONNECTION_CONFIG: SocketConfig = {
 	connectTimeoutMs: 20_000,
 	// a tighter keep-alive keeps the socket warm and detects drops sooner -> lower latency
 	keepAliveIntervalMs: 10_000,
-	logger: logger.child({ class: 'baileys' }),
+	logger: logger.child({ class: 'yui-bails' }),
 	emitOwnEvents: true,
 	defaultQueryTimeoutMs: 60_000,
 	customUploadHosts: [],

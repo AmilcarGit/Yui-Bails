@@ -52,7 +52,7 @@ export interface GroupMetadata {
 	isCommunityAnnounce?: boolean
 	/** number of group participants */
 	size?: number
-	// Baileys modified array
+	// Yui-Bails modified array
 	participants: GroupParticipant[]
 	ephemeralDuration?: number
 	inviteCode?: string

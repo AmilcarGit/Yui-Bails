@@ -1,10 +1,10 @@
 # AGENTS.md
 
-Guide for AI coding agents (Claude Code, Cursor, Aider, Codex, Copilot Workspace, etc.) contributing to Baileys. Human contributors should also read this — there's nothing AI-specific in the conventions, only in the disclosure rules at the end.
+Guide for AI coding agents (Claude Code, Cursor, Aider, Codex, Copilot Workspace, etc.) contributing to Yui-Bails. Human contributors should also read this — there's nothing AI-specific in the conventions, only in the disclosure rules at the end.
 
 If you are an AI agent driving this repo, read this file first, then `CODE_OF_CONDUCT.md` (specifically the AI policy section), then `SECURITY.md`.
 
-## What Baileys is
+## What Yui-Bails is
 
 A TypeScript WebSocket client for the WhatsApp Web protocol. No browser, no Selenium — it speaks the binary Noise/protobuf protocol directly. Used by thousands of downstream projects, so changes to public APIs and wire-level handling have wide blast radius.
 
@@ -20,7 +20,7 @@ src/
   Types/           Public TypeScript types — touching these is a public-API change
   WABinary/        Binary node encoding/decoding
   WAUSync/         USync query protocols
-  Defaults/        Constants (WA Web version, baileys version, default config)
+  Defaults/        Constants (WA Web version, yui-bails version, default config)
   __tests__/       Jest unit + integration tests; e2e tests live in __tests__/e2e
 WAProto/           Generated protobuf bindings — DO NOT hand-edit
 Example/           Reference implementation in example.ts
@@ -256,13 +256,13 @@ PR titles follow the same convention. Squash-merge is the default.
 Before opening a PR:
 1. `yarn lint` — must be 0 errors.
 2. `yarn test` — must be all green. If you can't run e2e locally, say so in the PR description.
-3. Don't commit `baileys_auth_info/`, `.env`, `mitm_*.db`, `.superset/`, or any session state. Git is configured to ignore the obvious ones; double-check.
+3. Don't commit `yui_auth_info/`, `.env`, `mitm_*.db`, `.superset/`, or any session state. Git is configured to ignore the obvious ones; double-check.
 4. Don't commit regenerated `yarn.lock` from a different package manager. If your `yarn.lock` diff is unexpectedly large (thousands of lines for a one-line `package.json` change), you're using Yarn 1 — switch to Corepack.
 
 ## What not to touch without coordination
 
 - **`libsignal` cryptographic flows** — session state, prekeys, sender-key derivation. Subtle bugs here are silent and brick downstream sessions.
-- **`Defaults/baileys-version.json`** — bumped by the `update-version` workflow. Manual edits race with automation.
+- **`Defaults/yui-version.json`** — bumped by the `update-version` workflow. Manual edits race with automation.
 - **`WAProto/` generated files** — regenerate, don't hand-edit.
 - **`.github/workflows/`** — CI changes are reviewed separately; bundle them in their own PR when possible.
 - **`package.json` `resolutions`** — these patch known security advisories. Removing entries reintroduces CVEs; check `yarn npm audit --recursive` before pruning.
@@ -291,7 +291,7 @@ Beyond the AI policy in `CODE_OF_CONDUCT.md`:
 - **Read before you write.** This codebase has subtle protocol invariants. A grep-and-replace agent will make a mess of `Socket/messages-recv.ts`. Read the surrounding handler before editing.
 - **Don't invent WhatsApp protocol details.** If you're not sure how a stanza is structured, find a real example in the tests or in `Utils/decode-wa-message.ts`. Hallucinated XML attributes get merged and then break in production.
 - **Stay in scope.** A bug fix doesn't need a refactor pass. A type tweak doesn't need a comment cleanup PR.
-- **Don't paste auth state into AI tools.** `baileys_auth_info/` contains long-lived Signal keys. Treat it like an SSH private key.
+- **Don't paste auth state into AI tools.** `yui_auth_info/` contains long-lived Signal keys. Treat it like an SSH private key.
 - **Disclose AI authorship in PRs.** A one-line "drafted with [tool], reviewed by [human]" is enough. See `CODE_OF_CONDUCT.md` § AI Policy for the full rule.
 
 ## Where to ask

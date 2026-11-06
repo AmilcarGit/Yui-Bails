@@ -1048,7 +1048,7 @@ export const makeChatsSocket = (config: SocketConfig) => {
 	}
 
 	/**
-	 * Enable/Disable link preview privacy, not related to baileys link preview generation
+	 * Enable/Disable link preview privacy, not related to yui-bails link preview generation
 	 */
 	const updateDisableLinkPreviewsPrivacy = (isPreviewsDisabled: boolean) => {
 		return chatModify(

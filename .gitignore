@@ -4,6 +4,9 @@
 *.tgz
 */.DS_Store
 auth_info*.json
+yui_auth_info*
+yui_store*.json
+# nombres antiguos: siguen ignorados para no subir sesiones por error
 baileys_auth_info*
 baileys_store*.json
 browser-messages.json

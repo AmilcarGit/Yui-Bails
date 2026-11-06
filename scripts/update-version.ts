@@ -2,7 +2,7 @@
 /**
  * Script to update WhatsApp Web version across the codebase.
  * Fetches the latest version from web.whatsapp.com and updates:
- * - src/Defaults/baileys-version.json
+ * - src/Defaults/yui-version.json
  * - src/Defaults/index.ts
  * - src/Utils/generics.ts
  *
@@ -18,8 +18,8 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const ROOT_DIR = join(__dirname, '..')
 
-function updateBaileysVersionJson(version: [number, number, number]): boolean {
-	const filePath = join(ROOT_DIR, 'src/Defaults/baileys-version.json')
+function updateYuiVersionJson(version: [number, number, number]): boolean {
+	const filePath = join(ROOT_DIR, 'src/Defaults/yui-version.json')
 	const content = {
 		version
 	}
@@ -29,15 +29,15 @@ function updateBaileysVersionJson(version: [number, number, number]): boolean {
 		const currentVersion = JSON.parse(currentContent).version as number[]
 
 		if (currentVersion[0] === version[0] && currentVersion[1] === version[1] && currentVersion[2] === version[2]) {
-			console.log(`✓ baileys-version.json already up to date`)
+			console.log(`✓ yui-version.json already up to date`)
 			return false
 		}
 
 		writeFileSync(filePath, JSON.stringify(content) + '\n')
-		console.log(`✓ Updated baileys-version.json: [${currentVersion.join(', ')}] → [${version.join(', ')}]`)
+		console.log(`✓ Updated yui-version.json: [${currentVersion.join(', ')}] → [${version.join(', ')}]`)
 		return true
 	} catch (error) {
-		console.error(`✗ Failed to update baileys-version.json:`, error)
+		console.error(`✗ Failed to update yui-version.json:`, error)
 		throw error
 	}
 }
@@ -47,11 +47,11 @@ function updateGenerics(version: [number, number, number]): boolean {
 
 	try {
 		const content = readFileSync(filePath, 'utf-8')
-		const versionRegex = /const baileysVersion = \[(\d+),\s*(\d+),\s*(\d+)\]/
+		const versionRegex = /const yuiVersion = \[(\d+),\s*(\d+),\s*(\d+)\]/
 		const match = content.match(versionRegex)
 
 		if (!match) {
-			throw new Error('Could not find baileysVersion declaration in generics.ts')
+			throw new Error('Could not find yuiVersion declaration in generics.ts')
 		}
 
 		const currentVersion = [+match[1]!, +match[2]!, +match[3]!]
@@ -63,7 +63,7 @@ function updateGenerics(version: [number, number, number]): boolean {
 
 		const newContent = content.replace(
 			versionRegex,
-			`const baileysVersion = [${version[0]}, ${version[1]}, ${version[2]}]`
+			`const yuiVersion = [${version[0]}, ${version[1]}, ${version[2]}]`
 		)
 
 		writeFileSync(filePath, newContent)
@@ -118,7 +118,7 @@ async function main() {
 	console.log(`Latest version: [${result.version.join(', ')}]\n`)
 
 	const updates = [
-		updateBaileysVersionJson(result.version),
+		updateYuiVersionJson(result.version),
 		updateGenerics(result.version),
 		updateIndex(result.version)
 	]

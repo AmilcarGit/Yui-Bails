@@ -2,10 +2,10 @@ import { Boom } from '@hapi/boom'
 import { createHash, randomBytes } from 'crypto'
 import type Long from 'long'
 import { proto } from '../../WAProto/index.js'
-const baileysVersion = [2, 3000, 1044006379]
+const yuiVersion = [2, 3000, 1044006379]
 import type {
-	BaileysEventEmitter,
-	BaileysEventMap,
+	YuiEventEmitter,
+	YuiEventMap,
 	ConnectionState,
 	WACallUpdateType,
 	WAMessageKey,
@@ -202,9 +202,9 @@ export const generateMessageIDV2 = (userId?: string): string => {
 // generate a random ID to attach to a message
 export const generateMessageID = () => '3EB0' + randomBytes(18).toString('hex').toUpperCase()
 
-export function bindWaitForEvent<T extends keyof BaileysEventMap>(ev: BaileysEventEmitter, event: T) {
-	return async (check: (u: BaileysEventMap[T]) => Promise<boolean | undefined>, timeoutMs?: number) => {
-		let listener: (item: BaileysEventMap[T]) => void
+export function bindWaitForEvent<T extends keyof YuiEventMap>(ev: YuiEventEmitter, event: T) {
+	return async (check: (u: YuiEventMap[T]) => Promise<boolean | undefined>, timeoutMs?: number) => {
+		let listener: (item: YuiEventMap[T]) => void
 		let closeListener: (state: Partial<ConnectionState>) => void
 		await promiseTimeout<void>(timeoutMs, (resolve, reject) => {
 			closeListener = ({ connection, lastDisconnect }) => {
@@ -230,13 +230,13 @@ export function bindWaitForEvent<T extends keyof BaileysEventMap>(ev: BaileysEve
 	}
 }
 
-export const bindWaitForConnectionUpdate = (ev: BaileysEventEmitter) => bindWaitForEvent(ev, 'connection.update')
+export const bindWaitForConnectionUpdate = (ev: YuiEventEmitter) => bindWaitForEvent(ev, 'connection.update')
 
 /**
- * utility that fetches latest baileys version from the master branch.
+ * utility that fetches the latest WhatsApp Web version, read from the upstream Baileys repo (master branch).
  * Use to ensure your WA connection is always on the latest version
  */
-export const fetchLatestBaileysVersion = async (options: RequestInit = {}) => {
+export const fetchLatestYuiVersion = async (options: RequestInit = {}) => {
 	const URL = 'https://raw.githubusercontent.com/WhiskeySockets/Baileys/master/src/Defaults/index.ts'
 	try {
 		const response = await fetch(URL, {
@@ -245,7 +245,7 @@ export const fetchLatestBaileysVersion = async (options: RequestInit = {}) => {
 			headers: options.headers
 		})
 		if (!response.ok) {
-			throw new Boom(`Failed to fetch latest Baileys version: ${response.statusText}`, { statusCode: response.status })
+			throw new Boom(`Failed to fetch latest WhatsApp Web version: ${response.statusText}`, { statusCode: response.status })
 		}
 
 		const text = await response.text()
@@ -266,12 +266,15 @@ export const fetchLatestBaileysVersion = async (options: RequestInit = {}) => {
 		}
 	} catch (error) {
 		return {
-			version: baileysVersion as WAVersion,
+			version: yuiVersion as WAVersion,
 			isLatest: false,
 			error
 		}
 	}
 }
+
+/** @deprecated alias de compatibilidad con Baileys, usa `fetchLatestYuiVersion` */
+export const fetchLatestBaileysVersion = fetchLatestYuiVersion
 
 /**
  * A utility that fetches the latest web version of whatsapp.
@@ -305,7 +308,7 @@ export const fetchLatestWaWebVersion = async (options: RequestInit = {}) => {
 
 		if (!match?.[1]) {
 			return {
-				version: baileysVersion as WAVersion,
+				version: yuiVersion as WAVersion,
 				isLatest: false,
 				error: {
 					message: 'Could not find client revision in the fetched content'
@@ -321,7 +324,7 @@ export const fetchLatestWaWebVersion = async (options: RequestInit = {}) => {
 		}
 	} catch (error) {
 		return {
-			version: baileysVersion as WAVersion,
+			version: yuiVersion as WAVersion,
 			isLatest: false,
 			error
 		}
@@ -358,7 +361,7 @@ const CODE_MAP: { [_: string]: DisconnectReason } = {
 }
 
 /**
- * Stream errors generally provide a reason, map that to a baileys DisconnectReason
+ * Stream errors generally provide a reason, map that to a yui-bails DisconnectReason
  * @param reason the string reason given, eg. "conflict"
  */
 export const getErrorCodeFromStreamError = (node: BinaryNode) => {

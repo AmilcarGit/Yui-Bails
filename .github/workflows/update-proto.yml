@@ -44,11 +44,11 @@ jobs:
       - name: GenerateStatics
         run: yarn gen:protobuf
 
-      - name: Update baileys-version.json
+      - name: Update yui-version.json
         run: |
           WA_VERSION="${{steps.wa_proto_info.outputs.wa_version}}"
           WA_NUMBERS=$(echo $WA_VERSION | sed "s/\./, /g")
-          echo -e "{\n\t\"version\": [$WA_NUMBERS]\n}" > src/Defaults/baileys-version.json
+          echo -e "{\n\t\"version\": [$WA_NUMBERS]\n}" > src/Defaults/yui-version.json
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
@@ -61,4 +61,4 @@ jobs:
           body: "Automated changes\nFound source JS URL: ${{steps.wa_proto_info.outputs.wa_js_url}}\nCurrent version: v${{steps.wa_proto_info.outputs.wa_version}}"
           add-paths: |
             WAProto/*
-            src/Defaults/baileys-version.json
+            src/Defaults/yui-version.json

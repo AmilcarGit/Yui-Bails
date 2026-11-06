@@ -11,9 +11,9 @@ export interface ILogger {
 }
 
 // silent by default: pino serializes every log call to JSON, which burns CPU
-// and floods hosting panels on busy bots. Set BAILEYS_LOG_LEVEL (e.g. 'info',
+// and floods hosting panels on busy bots. Set YUI_BAILS_LOG_LEVEL (e.g. 'info',
 // 'debug') or pass your own `logger` in the socket config to see logs again.
 export default P({
 	timestamp: () => `,"time":"${new Date().toJSON()}"`,
-	level: process.env.BAILEYS_LOG_LEVEL || 'silent'
+	level: process.env.YUI_BAILS_LOG_LEVEL || process.env.BAILEYS_LOG_LEVEL || 'silent'
 })

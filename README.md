@@ -3,12 +3,23 @@ una bails para tu bot con muchas funciones personalizadas
 
 > Basado en [ultra-baileys](https://github.com/russellxz/ultra-baileys) (rama master), que a su vez deriva de [Baileys](https://github.com/WhiskeySockets/Baileys).
 
+## 🔁 Nombres en Yui-Bails
+
+Todo lo que se llamaba Baileys ahora se llama Yui. Los nombres antiguos siguen funcionando (marcados como `@deprecated`), así que tus bots actuales no se rompen.
+
+| Antes | Ahora |
+|---|---|
+| `BaileysEventMap` / `BaileysEvent` / `BaileysEventEmitter` | `YuiEventMap` / `YuiEvent` / `YuiEventEmitter` |
+| `fetchLatestBaileysVersion` | `fetchLatestYuiVersion` |
+| `Browsers.baileys(...)` | `Browsers.yui(...)` |
+| `ULTRA_BAILEYS_*` | `YUI_BAILS_*` |
+| `BAILEYS_LOG_LEVEL` | `YUI_BAILS_LOG_LEVEL` |
+| `baileys_auth_info` (carpeta de sesión) | `yui_auth_info` |
+
 ---
 
-<h1 align='center'><img alt="Baileys logo" src="https://raw.githubusercontent.com/WhiskeySockets/Baileys/refs/heads/master/Media/logo.png" height="75"/></h1>
-
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=28&duration=2600&pause=700&color=F72585&center=true&vCenter=true&width=700&height=55&lines=%E2%9A%A1+RUSSELLXZ+%C2%B7+ULTRA+BAILEYS+%E2%9A%A1" alt="russellxz ultra baileys" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=28&duration=2600&pause=700&color=F72585&center=true&vCenter=true&width=700&height=55&lines=%E2%9A%A1+YUI+%C2%B7+BAILS+%E2%9A%A1" alt="yui bails" />
 </p>
 
 <p align="center">
@@ -27,7 +38,7 @@ una bails para tu bot con muchas funciones personalizadas
 
 <div align='center'>
 
-**russellxz-ultra-baileys** es un fork de Baileys (la librería WebSockets en TypeScript para la API de WhatsApp Web) **optimizado para volar**: menos latencia, botones que sí se pintan, y una consola sin basura.
+**Yui-Bails** es un fork de Baileys (la librería WebSockets en TypeScript para la API de WhatsApp Web) **optimizado para volar**: menos latencia, botones que sí se pintan, y una consola sin basura.
 
 </div>
 
@@ -134,7 +145,7 @@ await sock.sendMessage(jid, {
 
 ```bash
 # o globalmente, sin tocar los plugins
-ULTRA_BAILEYS_BUTTONS_FORMAT=buttons
+YUI_BAILS_BUTTONS_FORMAT=buttons
 ```
 
 Los botones de `url`, `call`, `copy` y `sections` no tienen equivalente clásico, así que siguen enviándose como native flow incluso en modo `buttons` (aunque esos no generan mensaje de respuesta, así que no producen el aviso).
@@ -143,10 +154,10 @@ Los botones de `url`, `call`, `copy` y `sections` no tienen equivalente clásico
 
 | Variable | Efecto |
 |---|---|
-| `ULTRA_BAILEYS_BUTTONS_FORMAT=buttons` | Cambia el formato de botones a `ButtonsMessage` clásico (ver abajo) |
-| `BAILEYS_LOG_LEVEL=info` | Reactiva los logs internos (por defecto: silencio total) |
-| `ULTRA_BAILEYS_VERBOSE=1` | Muestra también el ruido de libsignal (desactiva el filtro) |
-| `ULTRA_BAILEYS_NO_BANNER=1` | Oculta el banner de arranque |
+| `YUI_BAILS_BUTTONS_FORMAT=buttons` | Cambia el formato de botones a `ButtonsMessage` clásico (ver abajo) |
+| `YUI_BAILS_LOG_LEVEL=info` | Reactiva los logs internos (por defecto: silencio total) |
+| `YUI_BAILS_VERBOSE=1` | Muestra también el ruido de libsignal (desactiva el filtro) |
+| `YUI_BAILS_NO_BANNER=1` | Oculta el banner de arranque |
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%" alt="divider" />
@@ -166,40 +177,26 @@ This is a temporary README.md, the new guide is in development and will this fil
 
 New guide link: https://baileys.wiki
 
-# Get Support
-
-If you'd like business to enterprise-level support from Rajeh, the current maintainer of Baileys, you can book a video chat. Book a 1 hour time slot by contacting him on Discord or pre-ordering [here](https://purpshell.dev/book). The earlier you pre-order the better, as his time slots usually fill up very quickly. He offers immense value per hour and will answer all your questions before the time runs out.
-
-If you are a business, we encourage you to contribute back to the high development costs of the project and to feed the maintainers who dump tens of hours a week on this. You can do so by booking meetings or sponsoring below. All support, even in bona fide / contribution hours, is welcome by businesses of all sizes. This is not condoning or endorsing businesses to use the library. See the Disclaimer below.
-
-# Sponsor
-If you'd like to financially support this project, you can do so by supporting the current maintainer [here](https://purpshell.dev/sponsor).
-
 # Disclaimer
 This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with WhatsApp or any of its subsidiaries or its affiliates.
 The official WhatsApp website can be found at whatsapp.com. "WhatsApp" as well as related names, marks, emblems and images are registered trademarks of their respective owners.
 
-The maintainers of Baileys do not in any way condone the use of this application in practices that violate the Terms of Service of WhatsApp. The maintainers of this application call upon the personal responsibility of its users to use this application in a fair way, as it is intended to be used.
+The maintainers of Yui-Bails do not in any way condone the use of this application in practices that violate the Terms of Service of WhatsApp. The maintainers of this application call upon the personal responsibility of its users to use this application in a fair way, as it is intended to be used.
 Use at your own discretion. Do not spam people with this. We discourage any stalkerware, bulk or automated messaging usage.
 
 ##
 
-- Baileys does not require Selenium or any other browser to be interface with WhatsApp Web, it does so directly using a **WebSocket**.
+- Yui-Bails does not require Selenium or any other browser to be interface with WhatsApp Web, it does so directly using a **WebSocket**.
 - Not running Selenium or Chromium saves you like **half a gig** of ram :/
-- Baileys supports interacting with the multi-device & web versions of WhatsApp.
+- Yui-Bails supports interacting with the multi-device & web versions of WhatsApp.
 - Thank you to [@pokearaujo](https://github.com/pokearaujo/multidevice) for writing his observations on the workings of WhatsApp Multi-Device. Also, thank you to [@Sigalor](https://github.com/sigalor/whatsapp-web-reveng) for writing his observations on the workings of WhatsApp Web and thanks to [@Rhymen](https://github.com/Rhymen/go-whatsapp/) for the __go__ implementation.
-
-> [!IMPORTANT]
-> The original repository had to be removed by the original author - we now continue development in this repository here.
-This is the only official repository and is maintained by the community.
-> **Join the Discord [here](https://discord.gg/WeJM5FP9GG)**
 
 ## Example
 
 Do check out & run [example.ts](Example/example.ts) to see an example usage of the library.
 The script covers most common use cases.
 To run the example script, download or clone the repo and then type the following in a terminal:
-1. ``` cd path/to/Baileys ```
+1. ``` cd path/to/Yui-Bails ```
 2. ``` yarn ```
 3. ``` yarn example ```
 
@@ -207,17 +204,17 @@ To run the example script, download or clone the repo and then type the followin
 
 Use the stable version:
 ```
-yarn add @whiskeysockets/baileys
+yarn add yui-bails
 ```
 
 Use the edge version (no guarantee of stability, but latest fixes + features)
 ```
-yarn add github:WhiskeySockets/Baileys
+yarn add github:AmilcarGit/Yui-Bails
 ```
 
 Then import your code using:
 ```ts
-import makeWASocket from '@whiskeysockets/baileys'
+import makeWASocket from 'yui-bails'
 ```
 
 # Links
@@ -326,13 +323,13 @@ import makeWASocket from '@whiskeysockets/baileys'
     - [Send Broadcast & Stories](#send-broadcast--stories)
     - [Query a Broadcast List's Recipients & Name](#query-a-broadcast-lists-recipients--name)
 - [Writing Custom Functionality](#writing-custom-functionality)
-    - [Enabling Debug Level in Baileys Logs](#enabling-debug-level-in-baileys-logs)
+    - [Enabling Debug Level in Yui-Bails Logs](#enabling-debug-level-in-yui-bails-logs)
     - [How Whatsapp Communicate With Us](#how-whatsapp-communicate-with-us)
     - [Register a Callback for Websocket Events](#register-a-callback-for-websocket-events)
 
 ## Connecting Account
 
-WhatsApp provides a multi-device API that allows Baileys to be authenticated as a second WhatsApp client by scanning a **QR code** or **Pairing Code** with WhatsApp on your phone.
+WhatsApp provides a multi-device API that allows Yui-Bails to be authenticated as a second WhatsApp client by scanning a **QR code** or **Pairing Code** with WhatsApp on your phone.
 
 > [!NOTE]
 > **[Here](#example-to-start) is a simple example of event handling**
@@ -346,7 +343,7 @@ WhatsApp provides a multi-device API that allows Baileys to be authenticated as 
 > You can customize browser name if you connect with **QR-CODE**, with `Browser` constant, we have some browsers config, **see the [BrowsersMap type alias](https://baileys.wiki/docs/api/type-aliases/BrowsersMap/)**
 
 ```ts
-import makeWASocket from '@whiskeysockets/baileys'
+import makeWASocket from 'yui-bails'
 
 const sock = makeWASocket({
     // can provide additional config here
@@ -366,7 +363,7 @@ If the connection is successful, you will see a QR code printed on your terminal
 The phone number can't have `+` or `()` or `-`, only numbers, you must provide country code
 
 ```ts
-import makeWASocket from '@whiskeysockets/baileys'
+import makeWASocket from 'yui-bails'
 
 const sock = makeWASocket({
     // can provide additional config here
@@ -383,7 +380,7 @@ if (!sock.authState.creds.registered) {
 ### Receive Full History
 
 1. Set `syncFullHistory` as `true`
-2. Baileys, by default, use chrome browser config
+2. Yui-Bails, by default, use chrome browser config
     - If you'd like to emulate a desktop connection (and receive more message history), this browser setting to your Socket config:
 
 ```ts
@@ -420,7 +417,7 @@ const sock = makeWASocket({ auth: state })
 - To opt out entirely, set `syncWaWebVersion: false`.
 
 ### Caching Group Metadata (Recommended)
-- If you use baileys for groups, we recommend you to set `cachedGroupMetadata` in socket config, you need to implement a cache like this:
+- If you use yui-bails for groups, we recommend you to set `cachedGroupMetadata` in socket config, you need to implement a cache like this:
 
     ```ts
     const groupCache = new NodeCache({stdTTL: 5 * 60, useClones: false})
@@ -461,9 +458,9 @@ You obviously don't want to keep scanning the QR code every time you want to con
 
 So, you can load the credentials to log back in:
 ```ts
-import makeWASocket, { useMultiFileAuthState } from '@whiskeysockets/baileys'
+import makeWASocket, { useMultiFileAuthState } from 'yui-bails'
 
-const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys')
+const { state, saveCreds } = await useMultiFileAuthState('auth_info_yui')
 
 // will use the given state to connect
 // so if valid credentials are available -- it'll connect without QR
@@ -481,11 +478,11 @@ sock.ev.on('creds.update', saveCreds)
 
 ## Handling Events
 
-- Baileys uses the EventEmitter syntax for events.
+- Yui-Bails uses the EventEmitter syntax for events.
 They're all nicely typed up, so you shouldn't have any issues with an Intellisense editor like VS Code.
 
 > [!IMPORTANT]
-> **The events are in the [BaileysEventMap type alias](https://baileys.wiki/docs/api/type-aliases/BaileysEventMap/)**, it's important you see all events
+> **The events are in the [YuiEventMap type alias](https://baileys.wiki/docs/api/type-aliases/BaileysEventMap/)**, it's important you see all events
 
 You can listen to these events like this:
 ```ts
@@ -504,11 +501,11 @@ sock.ev.on('messages.upsert', ({ messages }) => {
 > For reliable serialization of the authentication state, especially when storing as JSON, always use the BufferJSON utility.
 
 ```ts
-import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys'
+import makeWASocket, { DisconnectReason, useMultiFileAuthState } from 'yui-bails'
 import { Boom } from '@hapi/boom'
 
 async function connectToWhatsApp () {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys')
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info_yui')
     const sock = makeWASocket({
         // can provide additional config here
         auth: state,
@@ -578,7 +575,7 @@ sock.ev.on('messages.update', event => {
 
 ## Implementing a Data Store
 
-- Baileys does not come with a defacto storage for chats, contacts, or messages. However, a simple in-memory implementation has been provided. The store listens for chat updates, new messages, message updates, etc., to always have an up-to-date version of the data.
+- Yui-Bails does not come with a defacto storage for chats, contacts, or messages. However, a simple in-memory implementation has been provided. The store listens for chat updates, new messages, message updates, etc., to always have an up-to-date version of the data.
 
 > [!IMPORTANT]
 > I highly recommend building your own data store, as storing someone's entire chat history in memory is a terrible waste of RAM.
@@ -586,15 +583,15 @@ sock.ev.on('messages.update', event => {
 It can be used as follows:
 
 ```ts
-import makeWASocket, { makeInMemoryStore } from '@whiskeysockets/baileys'
+import makeWASocket, { makeInMemoryStore } from 'yui-bails'
 // the store maintains the data of the WA connection in memory
 // can be written out to a file & read from it
 const store = makeInMemoryStore({ })
 // can be read from a file
-store.readFromFile('./baileys_store.json')
+store.readFromFile('./yui_store.json')
 // saves the state to a file every 10s
 setInterval(() => {
-    store.writeToFile('./baileys_store.json')
+    store.writeToFile('./yui_store.json')
 }, 10_000)
 
 const sock = makeWASocket({ })
@@ -765,14 +762,14 @@ await sock.sendMessage(
 ### Sending Messages with Link Previews
 
 1. By default, wa does not have link generation when sent from the web
-2. Baileys has a function to generate the content for these link previews
+2. Yui-Bails has a function to generate the content for these link previews
 3. To enable this function's usage, add `link-preview-js` as a dependency to your project with `yarn add link-preview-js`
 4. Send a link:
 ```ts
 await sock.sendMessage(
     jid,
     {
-        text: 'Hi, this was sent using https://github.com/whiskeysockets/baileys'
+        text: 'Hi, this was sent using https://github.com/AmilcarGit/Yui-Bails'
     }
 )
 ```
@@ -784,7 +781,7 @@ Sending media (video, stickers, images) is easier & more efficient than ever.
 > [!NOTE]
 > In media messages, you can pass `{ stream: Stream }` or `{ url: Url }` or `Buffer` directly, you can see more in the [WAMediaUpload type alias](https://baileys.wiki/docs/api/type-aliases/WAMediaUpload/)
 
-- When specifying a media url, Baileys never loads the entire buffer into memory; it even encrypts the media as a readable stream.
+- When specifying a media url, Yui-Bails never loads the entire buffer into memory; it even encrypts the media as a readable stream.
 
 > [!TIP]
 > It's recommended to use Stream or Url to save memory
@@ -902,7 +899,7 @@ await sock.sendMessage(jid, {
 If you want to save the media you received
 ```ts
 import { createWriteStream } from 'fs'
-import { downloadMediaMessage, getContentType } from '@whiskeysockets/baileys'
+import { downloadMediaMessage, getContentType } from 'yui-bails'
 
 sock.ev.on('messages.upsert', async ({ [m] }) => {
     if (!m.message) return // if there is no text or media message
@@ -917,7 +914,7 @@ sock.ev.on('messages.upsert', async ({ [m] }) => {
             { },
             {
                 logger,
-                // pass this so that baileys can request a reupload of media
+                // pass this so that yui-bails can request a reupload of media
                 // that has been deleted
                 reuploadRequest: sock.updateMediaMessage
             }
@@ -948,7 +945,7 @@ await sock.rejectCall(callId, callFrom)
 
 ### Reading Messages
 - A set of message [keys](https://baileys.wiki/docs/api/type-aliases/WAMessageKey/) must be explicitly marked read now.
-- You cannot mark an entire 'chat' read as it were with Baileys Web.
+- You cannot mark an entire 'chat' read as it were with Yui-Bails Web.
 This means you have to keep track of unread messages.
 
 ```ts
@@ -971,7 +968,7 @@ await sock.sendPresenceUpdate('available', jid)
 ```
 
 > [!NOTE]
-> If a desktop client is active, WA doesn't send push notifications to the device. If you would like to receive said notifications -- mark your Baileys client offline using `sock.sendPresenceUpdate('unavailable')`
+> If a desktop client is active, WA doesn't send push notifications to the device. If you would like to receive said notifications -- mark your Yui-Bails client offline using `sock.sendPresenceUpdate('unavailable')`
 
 ## Modifying Chats
 
@@ -1391,9 +1388,9 @@ console.log (`list name: ${bList.name}, recps: ${bList.recipients}`)
 ```
 
 ## Writing Custom Functionality
-Baileys is written with custom functionality in mind. Instead of forking the project & re-writing the internals, you can simply write your own extensions.
+Yui-Bails is written with custom functionality in mind. Instead of forking the project & re-writing the internals, you can simply write your own extensions.
 
-### Enabling Debug Level in Baileys Logs
+### Enabling Debug Level in Yui-Bails Logs
 First, enable the logging of unhandled messages from WhatsApp by setting:
 ```ts
 const sock = makeWASocket({
@@ -1461,6 +1458,7 @@ sock.ws.on('CB:edge_routing,id:abcd,routing_info', (node: BinaryNode) => { })
 ```
 
 # License
+Copyright (c) 2026 AMILCARGIT OFICIAL
 Copyright (c) 2025 Rajeh Taher/WhiskeySockets
 
 Licensed under the MIT License:

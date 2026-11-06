@@ -4,7 +4,7 @@
  * key buffers, prekey dumps, etc). That noise is useless to bot developers
  * and floods hosting panels, so we filter those exact messages out here.
  *
- * Set ULTRA_BAILEYS_VERBOSE=1 to disable the filter and see everything.
+ * Set YUI_BAILS_VERBOSE=1 to disable the filter and see everything.
  */
 
 const SIGNAL_NOISE = [
@@ -29,11 +29,11 @@ const isNoise = (args: unknown[]): boolean =>
 		return typeof arg === 'object' && arg !== null && arg.constructor?.name === 'SessionEntry'
 	})
 
-const INSTALLED = Symbol.for('ultra-baileys.console-filter')
+const INSTALLED = Symbol.for('yui-bails.console-filter')
 
 export const installConsoleFilter = () => {
 	const globalAny = globalThis as Record<PropertyKey, unknown>
-	if (globalAny[INSTALLED] || process.env.ULTRA_BAILEYS_VERBOSE) {
+	if (globalAny[INSTALLED] || (process.env.YUI_BAILS_VERBOSE || process.env.ULTRA_BAILEYS_VERBOSE)) {
 		return
 	}
 

@@ -11,7 +11,7 @@ import { useMultiFileAuthState } from '../..'
  */
 export const makeSession = async () => {
 	// Create a temporary directory for the session files
-	const dir = join(tmpdir(), `baileys-test-session-${Date.now()}`)
+	const dir = join(tmpdir(), `yui-test-session-${Date.now()}`)
 	await fs.mkdir(dir, { recursive: true })
 
 	// Use the multi-file auth state with the temporary directory

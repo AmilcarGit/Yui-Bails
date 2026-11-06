@@ -2,7 +2,7 @@ import { Boom } from '@hapi/boom'
 import { expandAppStateKeys } from 'whatsapp-rust-bridge'
 import { proto } from '../../WAProto/index.js'
 import type {
-	BaileysEventEmitter,
+	YuiEventEmitter,
 	Chat,
 	ChatModification,
 	ChatMutation,
@@ -145,7 +145,7 @@ export const MAX_SYNC_ATTEMPTS = 2
 /**
  * Check if an error is a missing app state sync key.
  * WA Web treats these as "Blocked" (waits for key arrival), not fatal.
- * In Baileys we retry with a snapshot which may use a different key.
+ * In Yui-Bails we retry with a snapshot which may use a different key.
  */
 export const isMissingKeyError = (error: any): boolean => {
 	return error?.data?.isMissingKey === true
@@ -822,7 +822,7 @@ export const chatModificationToAppPatch = (mod: ChatModification, jid: string) =
 
 export const processSyncAction = (
 	syncAction: ChatMutation,
-	ev: BaileysEventEmitter,
+	ev: YuiEventEmitter,
 	me: Contact,
 	initialSyncOpts?: InitialAppStateSyncOptions,
 	logger?: ILogger

@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import P, { type Logger } from 'pino'
 import makeWASocket, {
-	type BaileysEventMap,
+	type YuiEventMap,
 	DisconnectReason,
 	jidNormalizedUser,
 	makeCacheableSignalKeyStore,
@@ -46,11 +46,11 @@ interface ResolvedConfig {
 	agent: Agent
 }
 
-const uniquePushName = (prefix = 'baileys-e2e') => `${prefix}-${randomUUID()}`
+const uniquePushName = (prefix = 'yui-e2e') => `${prefix}-${randomUUID()}`
 
 const resolveConfig = (opts: TestClientOptions): ResolvedConfig => ({
 	socketUrl: opts.socketUrl ?? process.env.SOCKET_URL ?? DEFAULT_SOCKET_URL,
-	authDir: opts.authDir ?? join(tmpdir(), `baileys-e2e-${randomUUID()}`),
+	authDir: opts.authDir ?? join(tmpdir(), `yui-e2e-${randomUUID()}`),
 	pushName: opts.pushName,
 	advSecretKey: opts.advSecretKey ?? process.env.ADV_SECRET_KEY ?? DEFAULT_ADV_SECRET_KEY,
 	logger: P({ level: opts.logLevel ?? 'debug' }),
@@ -192,13 +192,13 @@ const openConnection = async (
 			throw result.error
 		}
 
-		// pairing-handoff close: Baileys terminates the noise socket once paired, we re-open
+		// pairing-handoff close: Yui-Bails terminates the noise socket once paired, we re-open
 		config.logger.debug({ reason: result.reason }, 'reconnecting after pairing handoff')
 	}
 }
 
 /**
- * Baileys socket wrapped with e2e ergonomics: QR autoscan via bartender admin,
+ * Yui-Bails socket wrapped with e2e ergonomics: QR autoscan via bartender admin,
  * tmp auth dir per instance, and event/message wait helpers with timeouts.
  *
  *   const tc = await TestClient.connect()
@@ -250,14 +250,14 @@ export class TestClient {
 	}
 
 	/** Wait for an event matching `predicate`, with a timeout that auto-detaches the listener. */
-	waitForEvent<K extends keyof BaileysEventMap>(
+	waitForEvent<K extends keyof YuiEventMap>(
 		event: K,
-		predicate: (data: BaileysEventMap[K]) => boolean,
+		predicate: (data: YuiEventMap[K]) => boolean,
 		timeoutMs = DEFAULT_TIMEOUT_MS
-	): Promise<BaileysEventMap[K]> {
-		return waitWithTimeout<BaileysEventMap[K]>(
+	): Promise<YuiEventMap[K]> {
+		return waitWithTimeout<YuiEventMap[K]>(
 			emit => {
-				const handler = (data: BaileysEventMap[K]) => {
+				const handler = (data: YuiEventMap[K]) => {
 					if (predicate(data)) emit(data)
 				}
 
