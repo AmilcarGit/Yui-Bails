@@ -2,7 +2,6 @@ import { Boom } from '@hapi/boom'
 import { expandAppStateKeys } from 'whatsapp-rust-bridge'
 import { proto } from '../../WAProto/index.js'
 import type {
-	YuiEventEmitter,
 	Chat,
 	ChatModification,
 	ChatMutation,
@@ -12,7 +11,8 @@ import type {
 	LastMessageList,
 	LTHashState,
 	WAPatchCreate,
-	WAPatchName
+	WAPatchName,
+	YuiEventEmitter
 } from '../Types'
 import {
 	type ChatLabelAssociation,

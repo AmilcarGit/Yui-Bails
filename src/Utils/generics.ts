@@ -3,14 +3,7 @@ import { createHash, randomBytes } from 'crypto'
 import type Long from 'long'
 import { proto } from '../../WAProto/index.js'
 const yuiVersion = [2, 3000, 1044006379]
-import type {
-	YuiEventEmitter,
-	YuiEventMap,
-	ConnectionState,
-	WACallUpdateType,
-	WAMessageKey,
-	WAVersion
-} from '../Types'
+import type { ConnectionState, WACallUpdateType, WAMessageKey, WAVersion, YuiEventEmitter, YuiEventMap } from '../Types'
 import { DisconnectReason } from '../Types'
 import { type BinaryNode, getAllBinaryNodeChildren, jidDecode } from '../WABinary'
 import { sha256 } from './crypto'
@@ -245,7 +238,9 @@ export const fetchLatestYuiVersion = async (options: RequestInit = {}) => {
 			headers: options.headers
 		})
 		if (!response.ok) {
-			throw new Boom(`Failed to fetch latest WhatsApp Web version: ${response.statusText}`, { statusCode: response.status })
+			throw new Boom(`Failed to fetch latest WhatsApp Web version: ${response.statusText}`, {
+				statusCode: response.status
+			})
 		}
 
 		const text = await response.text()

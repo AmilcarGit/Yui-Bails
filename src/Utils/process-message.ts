@@ -2,7 +2,6 @@ import { Boom } from '@hapi/boom'
 import { proto } from '../../WAProto/index.js'
 import type {
 	AuthenticationCreds,
-	YuiEventEmitter,
 	CacheStore,
 	Chat,
 	GroupMetadata,
@@ -15,7 +14,8 @@ import type {
 	SignalRepositoryWithLIDStore,
 	SocketConfig,
 	WAMessage,
-	WAMessageKey
+	WAMessageKey,
+	YuiEventEmitter
 } from '../Types'
 import { WAMessageStubType } from '../Types'
 import { getContentType, normalizeMessageContent } from '../Utils/messages'

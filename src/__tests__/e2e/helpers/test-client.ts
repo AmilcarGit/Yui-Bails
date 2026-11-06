@@ -6,12 +6,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import P, { type Logger } from 'pino'
 import makeWASocket, {
-	type YuiEventMap,
 	DisconnectReason,
 	jidNormalizedUser,
 	makeCacheableSignalKeyStore,
 	type proto,
-	useMultiFileAuthState
+	useMultiFileAuthState,
+	type YuiEventMap
 } from '../../../index'
 import { postQrToMockPhone } from './mock-phone'
 

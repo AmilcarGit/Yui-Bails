@@ -1,5 +1,5 @@
 import { proto } from '../../WAProto/index.js'
-import type { YuiEventEmitter, YuiEventMap, Contact } from '../Types'
+import type { Contact, YuiEventEmitter, YuiEventMap } from '../Types'
 import { isLidUser, isPnUser } from '../WABinary'
 import type { ILogger } from './logger'
 

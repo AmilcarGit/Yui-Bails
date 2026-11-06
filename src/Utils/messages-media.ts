@@ -12,7 +12,6 @@ import { URL } from 'url'
 import { proto } from '../../WAProto/index.js'
 import { DEFAULT_ORIGIN, MEDIA_HKDF_KEY_MAPPING, MEDIA_PATH_MAP, type MediaType } from '../Defaults'
 import type {
-	YuiEventMap,
 	DownloadableMessage,
 	MediaConnInfo,
 	MediaDecryptionKeyInfo,
@@ -22,7 +21,8 @@ import type {
 	WAMediaUpload,
 	WAMediaUploadFunction,
 	WAMessageContent,
-	WAMessageKey
+	WAMessageKey,
+	YuiEventMap
 } from '../Types'
 import { type BinaryNode, getBinaryNodeChild, getBinaryNodeChildBuffer, jidNormalizedUser } from '../WABinary'
 import { aesDecryptGCM, aesEncryptGCM, hkdf } from './crypto'

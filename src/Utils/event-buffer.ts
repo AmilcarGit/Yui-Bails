@@ -1,15 +1,15 @@
 import EventEmitter from 'events'
 import type { proto } from '../../WAProto/index.js'
 import type {
-	YuiEvent,
-	YuiEventEmitter,
-	YuiEventMap,
 	BufferedEventData,
 	Chat,
 	ChatUpdate,
 	Contact,
 	WAMessage,
-	WAMessageKey
+	WAMessageKey,
+	YuiEvent,
+	YuiEventEmitter,
+	YuiEventMap
 } from '../Types'
 import { WAMessageStatus } from '../Types'
 import { trimUndefined } from './generics'

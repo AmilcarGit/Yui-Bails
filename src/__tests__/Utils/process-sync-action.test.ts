@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import { proto } from '../../../WAProto/index.js'
-import type { YuiEventEmitter, ChatMutation, Contact } from '../../Types'
+import type { ChatMutation, Contact, YuiEventEmitter } from '../../Types'
 import { LabelAssociationType } from '../../Types/LabelAssociation'
 import { processSyncAction } from '../../Utils/chat-utils'
 import type { ILogger } from '../../Utils/logger'
