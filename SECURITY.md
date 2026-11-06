@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-**Do not file security issues as public GitHub issues, Discord posts, or PRs.** A public report is itself an exploit broadcast — many downstream projects pull Yui-Bails directly from `master` or from `github:AmilcarGit/Yui-Bails`, so a vulnerable version is in the wild within minutes.
+**Do not file security issues as public GitHub issues, social media posts, or PRs.** A public report is itself an exploit broadcast — many downstream projects pull Yui-Bails directly from `master` or from `github:AmilcarGit/Yui-Bails`, so a vulnerable version is in the wild within minutes.
 
 Use this private channel:
 

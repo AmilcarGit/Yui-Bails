@@ -33,7 +33,7 @@ const INSTALLED = Symbol.for('yui-bails.console-filter')
 
 export const installConsoleFilter = () => {
 	const globalAny = globalThis as Record<PropertyKey, unknown>
-	if (globalAny[INSTALLED] || (process.env.YUI_BAILS_VERBOSE || process.env.ULTRA_BAILEYS_VERBOSE)) {
+	if (globalAny[INSTALLED] || process.env.YUI_BAILS_VERBOSE) {
 		return
 	}
 

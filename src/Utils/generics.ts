@@ -233,11 +233,11 @@ export function bindWaitForEvent<T extends keyof YuiEventMap>(ev: YuiEventEmitte
 export const bindWaitForConnectionUpdate = (ev: YuiEventEmitter) => bindWaitForEvent(ev, 'connection.update')
 
 /**
- * utility that fetches the latest WhatsApp Web version, read from the upstream Baileys repo (master branch).
+ * utility that fetches the latest WhatsApp Web version declared in the Yui-Bails repo (main branch).
  * Use to ensure your WA connection is always on the latest version
  */
 export const fetchLatestYuiVersion = async (options: RequestInit = {}) => {
-	const URL = 'https://raw.githubusercontent.com/WhiskeySockets/Baileys/master/src/Defaults/index.ts'
+	const URL = 'https://raw.githubusercontent.com/AmilcarGit/Yui-Bails/main/src/Defaults/index.ts'
 	try {
 		const response = await fetch(URL, {
 			dispatcher: options.dispatcher,
@@ -272,9 +272,6 @@ export const fetchLatestYuiVersion = async (options: RequestInit = {}) => {
 		}
 	}
 }
-
-/** @deprecated alias de compatibilidad con Baileys, usa `fetchLatestYuiVersion` */
-export const fetchLatestBaileysVersion = fetchLatestYuiVersion
 
 /**
  * A utility that fetches the latest web version of whatsapp.

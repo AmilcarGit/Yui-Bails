@@ -1,22 +1,10 @@
 # Yui-Bails
-una bails para tu bot con muchas funciones personalizadas 
 
-> Basado en [ultra-baileys](https://github.com/russellxz/ultra-baileys) (rama master), que a su vez deriva de [Baileys](https://github.com/WhiskeySockets/Baileys).
+Una bails profesional para tu bot de WhatsApp 👑
 
-## 🔁 Nombres en Yui-Bails
+**Creador:** [AmilcarGit](https://github.com/AmilcarGit)
 
-Todo lo que se llamaba Baileys ahora se llama Yui. Los nombres antiguos siguen funcionando (marcados como `@deprecated`), así que tus bots actuales no se rompen.
-
-| Antes | Ahora |
-|---|---|
-| `BaileysEventMap` / `BaileysEvent` / `BaileysEventEmitter` | `YuiEventMap` / `YuiEvent` / `YuiEventEmitter` |
-| `fetchLatestBaileysVersion` | `fetchLatestYuiVersion` |
-| `Browsers.baileys(...)` | `Browsers.yui(...)` |
-| `ULTRA_BAILEYS_*` | `YUI_BAILS_*` |
-| `BAILEYS_LOG_LEVEL` | `YUI_BAILS_LOG_LEVEL` |
-| `baileys_auth_info` (carpeta de sesión) | `yui_auth_info` |
-
----
+<p align="center"><img alt="Yui-Bails" src="Media/logo.svg" height="90"/></p>
 
 <p align="center">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=28&duration=2600&pause=700&color=F72585&center=true&vCenter=true&width=700&height=55&lines=%E2%9A%A1+YUI+%C2%B7+BAILS+%E2%9A%A1" alt="yui bails" />
@@ -32,17 +20,17 @@ Todo lo que se llamaba Baileys ahora se llama Yui. Los nombres antiguos siguen f
 
 <p align="center">
   <a href="#-botones-nativos-incluidos"><img src="https://img.shields.io/badge/%F0%9F%94%98_BOTONES-NATIVOS-00e5ff?style=for-the-badge&labelColor=0d1117" alt="botones" /></a>
-  <a href="#-qué-trae-este-fork"><img src="https://img.shields.io/badge/%E2%9A%A1_MODO-TURBO-f72585?style=for-the-badge&labelColor=0d1117" alt="turbo" /></a>
-  <a href="#-qué-trae-este-fork"><img src="https://img.shields.io/badge/%F0%9F%A7%B9_CONSOLA-LIMPIA-9d4edd?style=for-the-badge&labelColor=0d1117" alt="consola" /></a>
+  <a href="#-qué-trae-yui-bails"><img src="https://img.shields.io/badge/%E2%9A%A1_MODO-TURBO-f72585?style=for-the-badge&labelColor=0d1117" alt="turbo" /></a>
+  <a href="#-qué-trae-yui-bails"><img src="https://img.shields.io/badge/%F0%9F%A7%B9_CONSOLA-LIMPIA-9d4edd?style=for-the-badge&labelColor=0d1117" alt="consola" /></a>
 </p>
 
 <div align='center'>
 
-**Yui-Bails** es un fork de Baileys (la librería WebSockets en TypeScript para la API de WhatsApp Web) **optimizado para volar**: menos latencia, botones que sí se pintan, y una consola sin basura.
+**Yui-Bails**, creada por **AmilcarGit**, es una librería WebSockets en TypeScript para la API de WhatsApp Web **optimizada para volar**: menos latencia, botones que sí se pintan, y una consola sin basura.
 
 </div>
 
-## ⚡ ¿Qué trae este fork?
+## ⚡ ¿Qué trae Yui-Bails?
 
 | | Mejora | Detalle |
 |---|---|---|
@@ -56,7 +44,7 @@ Todo lo que se llamaba Baileys ahora se llama Yui. Los nombres antiguos siguen f
 | ⏱️ | **Sin bloqueos largos** | Reintentos de transacción 30s→2.5s peor caso · link preview con tope de 1.5s |
 | 🪄 | **Arranque ligero** | Sin sincronización de historial completo |
 | 🔄 | **Versión de WA Web al día** | Cada conexión pregunta a WhatsApp qué versión está sirviendo — se acabaron los `405`/`428` al vincular ([detalles](#whatsapp-web-version-fix-for-405--428-on-pairing)) |
-| ✨ | **Banner con flow** | Sabrás que corres la versión ultra apenas arranque |
+| ✨ | **Banner con flow** | Verás el banner de Yui-Bails apenas arranque |
 
 ## 🔘 Botones nativos incluidos
 
@@ -163,25 +151,13 @@ Los botones de `url`, `call`, `copy` y `sections` no tienen equivalente clásico
   <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%" alt="divider" />
 </p>
 
-<h2 align="center">📚 Documentación original de Baileys</h2>
-
-> [!CAUTION]
-> NOTICE OF BREAKING CHANGE.
->
-> As of 7.0.0, multiple breaking changes were introduced into the library.
->
-> Please check out https://whiskey.so/migrate-latest for more information.
-
-# Important Note
-This is a temporary README.md, the new guide is in development and will this file will be replaced with .github/README.md (already a default on GitHub).
-
-New guide link: https://baileys.wiki
+<h2 align="center">📚 Guía de uso</h2>
 
 # Disclaimer
 This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with WhatsApp or any of its subsidiaries or its affiliates.
 The official WhatsApp website can be found at whatsapp.com. "WhatsApp" as well as related names, marks, emblems and images are registered trademarks of their respective owners.
 
-The maintainers of Yui-Bails do not in any way condone the use of this application in practices that violate the Terms of Service of WhatsApp. The maintainers of this application call upon the personal responsibility of its users to use this application in a fair way, as it is intended to be used.
+The maintainer of Yui-Bails does not in any way condone the use of this application in practices that violate the Terms of Service of WhatsApp. The maintainers of this application call upon the personal responsibility of its users to use this application in a fair way, as it is intended to be used.
 Use at your own discretion. Do not spam people with this. We discourage any stalkerware, bulk or automated messaging usage.
 
 ##
@@ -189,7 +165,6 @@ Use at your own discretion. Do not spam people with this. We discourage any stal
 - Yui-Bails does not require Selenium or any other browser to be interface with WhatsApp Web, it does so directly using a **WebSocket**.
 - Not running Selenium or Chromium saves you like **half a gig** of ram :/
 - Yui-Bails supports interacting with the multi-device & web versions of WhatsApp.
-- Thank you to [@pokearaujo](https://github.com/pokearaujo/multidevice) for writing his observations on the workings of WhatsApp Multi-Device. Also, thank you to [@Sigalor](https://github.com/sigalor/whatsapp-web-reveng) for writing his observations on the workings of WhatsApp Web and thanks to [@Rhymen](https://github.com/Rhymen/go-whatsapp/) for the __go__ implementation.
 
 ## Example
 
@@ -216,11 +191,6 @@ Then import your code using:
 ```ts
 import makeWASocket from 'yui-bails'
 ```
-
-# Links
-
-- [Discord](https://discord.gg/WeJM5FP9GG)
-- [Docs](https://baileys.wiki/docs/intro/)
 
 # Index
 
@@ -335,12 +305,12 @@ WhatsApp provides a multi-device API that allows Yui-Bails to be authenticated a
 > **[Here](#example-to-start) is a simple example of event handling**
 
 > [!TIP]
-> **You can see all supported socket configs in the [SocketConfig type alias](https://baileys.wiki/docs/api/type-aliases/SocketConfig/) (Recommended)**
+> **You can see all supported socket configs in the [SocketConfig type alias](src/Types) (Recommended)**
 
 ### Starting socket with **QR-CODE**
 
 > [!TIP]
-> You can customize browser name if you connect with **QR-CODE**, with `Browser` constant, we have some browsers config, **see the [BrowsersMap type alias](https://baileys.wiki/docs/api/type-aliases/BrowsersMap/)**
+> You can customize browser name if you connect with **QR-CODE**, with `Browser` constant, we have some browsers config, **see the [BrowsersMap type alias](src/Types)**
 
 ```ts
 import makeWASocket from 'yui-bails'
@@ -482,7 +452,7 @@ sock.ev.on('creds.update', saveCreds)
 They're all nicely typed up, so you shouldn't have any issues with an Intellisense editor like VS Code.
 
 > [!IMPORTANT]
-> **The events are in the [YuiEventMap type alias](https://baileys.wiki/docs/api/type-aliases/BaileysEventMap/)**, it's important you see all events
+> **The events are in the [YuiEventMap type alias](src/Types)**, it's important you see all events
 
 You can listen to these events like this:
 ```ts
@@ -632,8 +602,8 @@ The store also provides some simple functions such as `loadMessages` that utiliz
 ## Sending Messages
 
 - Send all types of messages with a single function
-    - **In the [AnyMessageContent type alias](https://baileys.wiki/docs/api/type-aliases/AnyMessageContent/) you can see all message contents supported, like text message**
-    - **In the [MiscMessageGenerationOptions type alias](https://baileys.wiki/docs/api/type-aliases/MiscMessageGenerationOptions/) you can see all options supported, like quote message**
+    - **In the [AnyMessageContent type alias](src/Types) you can see all message contents supported, like text message**
+    - **In the [MiscMessageGenerationOptions type alias](src/Types) you can see all options supported, like quote message**
 
     ```ts
     const jid: string
@@ -668,7 +638,7 @@ await sock.sendMessage(
 ```
 
 #### Forward Messages
-- You need to have message object, can be retrieved from [store](#implementing-a-data-store) or use a [message](https://baileys.wiki/docs/api/type-aliases/WAMessage/) object
+- You need to have message object, can be retrieved from [store](#implementing-a-data-store) or use a [message](src/Types) object
 ```ts
 const msg = getMessageFromStore() // implement this on your end
 await sock.sendMessage(jid, { forward: msg }) // WA forward the message!
@@ -707,7 +677,7 @@ await sock.sendMessage(
 ```
 
 #### Reaction Message
-- You need to pass the key of message, you can retrieve from [store](#implementing-a-data-store) or use a [key](https://baileys.wiki/docs/api/type-aliases/WAMessageKey/) object
+- You need to pass the key of message, you can retrieve from [store](#implementing-a-data-store) or use a [key](src/Types) object
 ```ts
 await sock.sendMessage(
     jid,
@@ -721,7 +691,7 @@ await sock.sendMessage(
 ```
 
 #### Pin Message
-- You need to pass the key of message, you can retrieve from [store](#implementing-a-data-store) or use a [key](https://baileys.wiki/docs/api/type-aliases/WAMessageKey/) object
+- You need to pass the key of message, you can retrieve from [store](#implementing-a-data-store) or use a [key](src/Types) object
 
 - Time can be:
 
@@ -779,7 +749,7 @@ await sock.sendMessage(
 Sending media (video, stickers, images) is easier & more efficient than ever.
 
 > [!NOTE]
-> In media messages, you can pass `{ stream: Stream }` or `{ url: Url }` or `Buffer` directly, you can see more in the [WAMediaUpload type alias](https://baileys.wiki/docs/api/type-aliases/WAMediaUpload/)
+> In media messages, you can pass `{ stream: Stream }` or `{ url: Url }` or `Buffer` directly, you can see more in the [WAMediaUpload type alias](src/Types)
 
 - When specifying a media url, Yui-Bails never loads the entire buffer into memory; it even encrypts the media as a readable stream.
 
@@ -944,7 +914,7 @@ await sock.rejectCall(callId, callFrom)
 ## Send States in Chat
 
 ### Reading Messages
-- A set of message [keys](https://baileys.wiki/docs/api/type-aliases/WAMessageKey/) must be explicitly marked read now.
+- A set of message [keys](src/Types) must be explicitly marked read now.
 - You cannot mark an entire 'chat' read as it were with Yui-Bails Web.
 This means you have to keep track of unread messages.
 
@@ -959,7 +929,7 @@ On a `WAMessage`, the `messageID` can be accessed using ```messageID = message.k
 
 ### Update Presence
 
-- ``` presence ``` can be one of the values in the [WAPresence type alias](https://baileys.wiki/docs/api/type-aliases/WAPresence/)
+- ``` presence ``` can be one of the values in the [WAPresence type alias](src/Types)
 - The presence expires after about 10 seconds.
 - This lets the person/group with `jid` know whether you're online, offline, typing etc.
 
@@ -1161,7 +1131,7 @@ await sock.updateProfileName('My name')
 - To change your display picture or a group's
 
 > [!NOTE]
-> Like media messages, you can pass `{ stream: Stream }` or `{ url: Url }` or `Buffer` directly, you can see more in the [WAMediaUpload type alias](https://baileys.wiki/docs/api/type-aliases/WAMediaUpload/)
+> Like media messages, you can pass `{ stream: Stream }` or `{ url: Url }` or `Buffer` directly, you can see more in the [WAMediaUpload type alias](src/Types)
 
 ```ts
 await sock.updateProfilePicture(jid, { url: './new-profile-picture.jpeg' })
@@ -1373,8 +1343,8 @@ await sock.sendMessage(
     }
 )
 ```
-- Message body can be a `extendedTextMessage` or `imageMessage` or `videoMessage` or `voiceMessage`, see the [AnyRegularMessageContent type alias](https://baileys.wiki/docs/api/type-aliases/AnyRegularMessageContent/)
-- You can add `backgroundColor` and other options in the message options, see the [MiscMessageGenerationOptions type alias](https://baileys.wiki/docs/api/type-aliases/MiscMessageGenerationOptions/)
+- Message body can be a `extendedTextMessage` or `imageMessage` or `videoMessage` or `voiceMessage`, see the [AnyRegularMessageContent type alias](src/Types)
+- You can add `backgroundColor` and other options in the message options, see the [MiscMessageGenerationOptions type alias](src/Types)
 - `broadcast: true` enables broadcast mode
 - `statusJidList`: a list of people that you can get which you need to provide, which are the people who will get this status message.
 
@@ -1457,27 +1427,8 @@ sock.ws.on('CB:edge_routing,id:abcd', (node: BinaryNode) => { })
 sock.ws.on('CB:edge_routing,id:abcd,routing_info', (node: BinaryNode) => { })
 ```
 
-# License
-Copyright (c) 2026 AMILCARGIT OFICIAL
-Copyright (c) 2025 Rajeh Taher/WhiskeySockets
+# Licencia
 
-Licensed under the MIT License:
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Licencia MIT. Consulta el archivo [LICENSE](LICENSE).
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-Thus, the maintainers of the project can't be held liable for any potential misuse of this project.
+Creado por [AmilcarGit](https://github.com/AmilcarGit).

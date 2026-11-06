@@ -20,8 +20,6 @@ export type BrowsersMap = {
 	ubuntu(browser: string): [string, string, string]
 	macOS(browser: string): [string, string, string]
 	yui(browser: string): [string, string, string]
-	/** @deprecated alias de compatibilidad, usa `yui` */
-	baileys(browser: string): [string, string, string]
 	windows(browser: string): [string, string, string]
 	android(browser: string): [string, string, string]
 	appropriate(browser: string): [string, string, string]

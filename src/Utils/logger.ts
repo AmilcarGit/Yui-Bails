@@ -15,5 +15,5 @@ export interface ILogger {
 // 'debug') or pass your own `logger` in the socket config to see logs again.
 export default P({
 	timestamp: () => `,"time":"${new Date().toJSON()}"`,
-	level: process.env.YUI_BAILS_LOG_LEVEL || process.env.BAILEYS_LOG_LEVEL || 'silent'
+	level: process.env.YUI_BAILS_LOG_LEVEL || 'silent'
 })

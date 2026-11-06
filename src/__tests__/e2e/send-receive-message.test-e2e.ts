@@ -123,7 +123,7 @@ describe('E2E Tests', () => {
 			'BEGIN:VCARD',
 			'VERSION:3.0',
 			'FN:E2E Test Contact',
-			'ORG:Baileys Tests;',
+			'ORG:Yui-Bails Tests;',
 			'TEL;type=CELL;type=VOICE;waid=1234567890:+1 234-567-890',
 			'END:VCARD'
 		].join('\n')
@@ -224,7 +224,7 @@ describe('E2E Tests', () => {
 
 	test('should download a quoted videos message within a group', async () => {
 		if (!tc.groupJid) {
-			console.warn('⚠️ Skipping group test because "Baileys Group Test" was not found.')
+			console.warn('⚠️ Skipping group test because "Yui Group Test" was not found.')
 			return
 		}
 

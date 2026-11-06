@@ -296,8 +296,6 @@ Beyond the AI policy in `CODE_OF_CONDUCT.md`:
 
 ## Where to ask
 
-- Discord: https://discord.gg/WeJM5FP9GG
-- Wiki: https://baileys.wiki
 - Security: see `SECURITY.md`
 
 If you're an agent and you're stuck on something this file doesn't cover, fall back to reading the relevant `src/` directory and the matching tests — they're the source of truth.

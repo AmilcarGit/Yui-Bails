@@ -20,7 +20,6 @@ export const Browsers: BrowsersMap = {
 	ubuntu: browser => ['Ubuntu', browser, '22.04.4'],
 	macOS: browser => ['Mac OS', browser, '14.4.1'],
 	yui: browser => ['Yui', browser, '6.5.0'],
-	baileys: browser => ['Yui', browser, '6.5.0'],
 	windows: browser => ['Windows', browser, '10.0.22631'],
 	android: browser => [browser, 'Android', ''],
 	/** The appropriate browser based on your OS & release */

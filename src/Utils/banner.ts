@@ -32,7 +32,7 @@ export const YUI_BAILS_VERSION = '7.0.0-rc13'
 let printed = false
 
 export const printBanner = (version: string = YUI_BAILS_VERSION) => {
-	if (printed || (process.env.YUI_BAILS_NO_BANNER || process.env.ULTRA_BAILEYS_NO_BANNER)) {
+	if (printed || process.env.YUI_BAILS_NO_BANNER) {
 		return
 	}
 
@@ -85,7 +85,7 @@ export type WaVersionSource =
  * WhatsApp refuse to link a device.
  */
 export const printWaVersionNotice = ({ version, source }: { version: number[]; source: WaVersionSource }) => {
-	if (versionNoticePrinted || (process.env.YUI_BAILS_NO_BANNER || process.env.ULTRA_BAILEYS_NO_BANNER)) {
+	if (versionNoticePrinted || process.env.YUI_BAILS_NO_BANNER) {
 		return
 	}
 

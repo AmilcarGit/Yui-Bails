@@ -243,7 +243,7 @@ export class TestClient {
 		return this.config.pushName
 	}
 
-	async resolveTestGroup(name = 'Baileys Group Test'): Promise<string | undefined> {
+	async resolveTestGroup(name = 'Yui Group Test'): Promise<string | undefined> {
 		const groups = await this.sock.groupFetchAllParticipating()
 		this.groupJid = Object.values(groups).find(g => g.subject === name)?.id
 		return this.groupJid
