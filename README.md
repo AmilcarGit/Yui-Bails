@@ -367,7 +367,7 @@ const sock = makeWASocket({
 ### WhatsApp Web Version (fix for `405` / `428` on pairing)
 WhatsApp turns down the handshake of clients that announce an outdated web version, which shows up as a `405 Method Not Allowed` / `428` right when you try to get a QR or a pairing code.
 
-This fork solves it on its own: **every connection asks WhatsApp which web version it is serving right now** (`web.whatsapp.com/sw.js`, falling back to `check-update`) and connects with that one. No protobuf/platform spoofing involved — only the version.
+Yui-Bails solves it on its own: **every connection asks WhatsApp which web version it is serving right now** (`web.whatsapp.com/sw.js`, falling back to `check-update`) and connects with that one. No protobuf/platform spoofing involved — only the version.
 
 ```ts
 // nothing to do: no `version` means "always the live one"
@@ -1358,7 +1358,7 @@ console.log (`list name: ${bList.name}, recps: ${bList.recipients}`)
 ```
 
 ## Writing Custom Functionality
-Yui-Bails is written with custom functionality in mind. Instead of forking the project & re-writing the internals, you can simply write your own extensions.
+Yui-Bails is written with custom functionality in mind. You can write your own extensions without re-writing the internals.
 
 ### Enabling Debug Level in Yui-Bails Logs
 First, enable the logging of unhandled messages from WhatsApp by setting:
