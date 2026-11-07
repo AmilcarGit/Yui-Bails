@@ -58,6 +58,7 @@ const textOf = (content: any): string => {
 	for (const field of ['text', 'caption']) {
 		if (typeof content[field] === 'string') return content[field]
 	}
+
 	return ''
 }
 

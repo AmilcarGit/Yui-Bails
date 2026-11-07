@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import { EventEmitter } from 'events'
 import type { WAMessage } from '../../Types'
 import { sha256 } from '../../Utils/crypto'

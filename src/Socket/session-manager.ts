@@ -202,10 +202,11 @@ export const makeSessionManager = (options: SessionManagerOptions) => {
 			session.stopped = true
 			session.status = 'closed'
 			try {
-				session.sock?.end(undefined)
+				void session.sock?.end(undefined)
 			} catch {
 				// already closed
 			}
+
 			sessions.delete(id)
 			return true
 		},
@@ -221,8 +222,10 @@ export const makeSessionManager = (options: SessionManagerOptions) => {
 				} catch {
 					// the socket may already be closed: the saved login is deleted below anyway
 				}
+
 				sessions.delete(id)
 			}
+
 			await fs.rm(authPath(id), { recursive: true, force: true })
 			return true
 		},

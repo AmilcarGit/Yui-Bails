@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import { makeSendQueue } from '../../Utils/send-queue'
 
 const setup = (options = {}) => {
