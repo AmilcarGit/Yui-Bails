@@ -2,6 +2,7 @@ import type { Agent } from 'https'
 import type { URL } from 'url'
 import { proto } from '../../WAProto/index.js'
 import type { ILogger } from '../Utils/logger'
+import type { SendQueueOptions } from '../Utils/send-queue'
 import type { AuthenticationState, LIDMapping, SignalAuthState, TransactionCapabilityOptions } from './Auth'
 import type { GroupMetadata } from './GroupMetadata'
 import { type MediaConnInfo, type WAMessageKey } from './Message'
@@ -156,4 +157,11 @@ export type SocketConfig = {
 		logger: ILogger,
 		pnToLIDFunc?: (jids: string[]) => Promise<LIDMapping[] | undefined>
 	) => SignalRepositoryWithLIDStore
+
+	/**
+	 * Anti-ban send queue: messages leave one by one with random pauses, a per-chat limit and an
+	 * automatic "typing…" indicator. `true` uses the defaults, an object customizes them.
+	 * Off by default.
+	 */
+	sendQueue?: boolean | SendQueueOptions
 }

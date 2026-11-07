@@ -8,6 +8,8 @@ export * from './WABinary/index'
 export * from './WAM/index'
 export * from './WAUSync/index'
 
+export * from './Socket/session-manager'
+
 export type WASocket = ReturnType<typeof makeWASocket>
 export { makeWASocket }
 export default makeWASocket

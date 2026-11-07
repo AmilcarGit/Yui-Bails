@@ -62,6 +62,13 @@ export type YuiEventMap = {
 
 	'messages.delete': { keys: WAMessageKey[] } | { jid: string; all: true }
 	'messages.update': WAMessageUpdate[]
+	/** a vote was cast (or changed) in a poll; `votes` has the full, current result */
+	'poll.votes': {
+		pollKey: WAMessageKey
+		pollName: string
+		votes: { name: string; voters: string[] }[]
+		voter: string
+	}
 	'messages.media-update': { key: WAMessageKey; media?: { ciphertext: Uint8Array; iv: Uint8Array }; error?: Boom }[]
 	/**
 	 * add/update the given messages. If they were received while the connection was online,

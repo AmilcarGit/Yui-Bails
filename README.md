@@ -45,6 +45,9 @@ Una bails profesional para tu bot de WhatsApp 👑
 | 🪄 | **Arranque ligero** | Sin sincronización de historial completo |
 | 🔄 | **Versión de WA Web al día** | Cada conexión pregunta a WhatsApp qué versión está sirviendo — se acabaron los `405`/`428` al vincular ([detalles](#whatsapp-web-version-fix-for-405--428-on-pairing)) |
 | ✨ | **Banner con flow** | Verás el banner de Yui-Bails apenas arranque |
+| 🧰 | **Helpers integrados** | `getSender`, `reply`, `react`, `sendButtons`, `sendList`, `sendPoll`, `downloadMedia` y conteo de votos de encuestas ([detalles](#-helpers-integrados)) |
+| 🛡️ | **Cola anti-ban** | Pausas aleatorias, límite por chat y "escribiendo…" automático ([detalles](#️-cola-anti-ban-sendqueue)) |
+| 📱 | **Multi-sesión** | Varios números de WhatsApp en un solo proceso con `makeSessionManager` ([detalles](#-multi-sesión-makesessionmanager)) |
 
 ## 🔘 Botones nativos incluidos
 
@@ -137,6 +140,121 @@ YUI_BAILS_BUTTONS_FORMAT=buttons
 ```
 
 Los botones de `url`, `call`, `copy` y `sections` no tienen equivalente clásico, así que siguen enviándose como native flow incluso en modo `buttons` (aunque esos no generan mensaje de respuesta, así que no producen el aviso).
+
+## 🧰 Helpers integrados
+
+Todo socket creado con `makeWASocket` ya los trae, no hay que importar nada.
+
+```js
+sock.ev.on('messages.upsert', async ({ messages }) => {
+  const msg = messages[0]
+
+  // Quién escribió: número real + id interno de WhatsApp (LID), aunque llegue solo uno
+  const sender = await sock.getSender(msg)
+  sender.number   // '51910227479'  (undefined si WhatsApp solo mandó el LID)
+  sender.id       // '269715926691844'  (id interno, parte de @lid)
+  sender.jid      // mejor jid para hablarle
+  sender.isGroup  // true / false
+  sender.is(['51910227479', '269715926691844'])  // ¿está en la lista? (ideal para owners)
+
+  await sock.reply(msg, 'Hola 👋')                 // responde citando
+  await sock.react(msg, '🔥')                      // reacciona
+
+  await sock.sendButtons(msg.key.remoteJid, {
+    text: 'Elige una opción',
+    buttons: [{ id: 'a', text: 'Opción A' }, { text: 'Web', url: 'https://example.com' }]
+  })
+
+  await sock.sendList(msg.key.remoteJid, {
+    text: 'Menú',
+    buttonText: 'Ver opciones',
+    sections: [{ title: 'Comandos', rows: [{ id: 'menu', title: 'Menú', description: 'Lista de comandos' }] }]
+  })
+
+  // Descarga en una sola llamada (también la del mensaje al que respondes)
+  const buffer = await sock.downloadMedia(msg)
+  const citada = await sock.downloadMedia(msg, { quoted: true })
+})
+```
+
+### Encuestas con conteo de votos
+
+```js
+const encuesta = await sock.sendPoll(jid, '¿Color favorito?', ['Rojo', 'Azul'])
+
+sock.ev.on('poll.votes', ({ pollName, votes, voter }) => {
+  // votes = [{ name: 'Rojo', voters: [...] }, { name: 'Azul', voters: [...] }]
+  console.log(pollName, votes.map(v => `${v.name}: ${v.voters.length}`))
+})
+
+sock.getPollVotes(encuesta.key) // resultado actual
+```
+
+> Para recibir los votos de encuestas que no envió este proceso, implementa `getMessage` en la config.
+
+## 🛡️ Cola anti-ban (`sendQueue`)
+
+Desactivada por defecto. Al activarla, todo lo que pase por `sock.sendMessage` (incluidos `reply`, `sendButtons`…) sale **uno a uno**, con pausas aleatorias, un límite por chat y el indicador "escribiendo…" proporcional al texto.
+
+```js
+const sock = makeWASocket({
+  auth: state,
+  sendQueue: true // o personaliza:
+  // sendQueue: { minDelayMs: 1000, maxDelayMs: 3000, perChatIntervalMs: 2000,
+  //              perChatLimit: { max: 15, windowMs: 60_000 }, typing: true }
+})
+
+sock.queue.size        // mensajes esperando
+sock.queue.clear()     // descarta los que faltan
+sock.sendMessageNow(jid, { text: 'urgente' }) // salta la cola
+```
+
+| Opción | Por defecto | Qué hace |
+|---|---|---|
+| `minDelayMs` / `maxDelayMs` | 800 / 2500 | Pausa aleatoria entre dos envíos |
+| `perChatIntervalMs` | 1500 | Mínimo entre dos mensajes al mismo chat |
+| `perChatLimit` | 20 por 60 s | Pasado el límite, los mensajes esperan |
+| `typing` | `true` | "escribiendo…" antes de los textos |
+| `typingMsPerChar` / `typingMinMs` / `typingMaxMs` | 30 / 500 / 3000 | Duración del "escribiendo…" |
+| `maxQueueSize` | 500 | Con la cola llena, `sendMessage` falla con 429 |
+
+Reduce el riesgo de bloqueo, pero no lo elimina: no escribas a números que no te conocen ni hagas spam.
+
+## 📱 Multi-sesión (`makeSessionManager`)
+
+Varios números de WhatsApp en un mismo proceso. Cada sesión guarda su login en `<authDir>/<id>/`, tiene su socket y se reconecta sola.
+
+```js
+import { makeSessionManager } from 'yui-bails'
+
+const sessions = makeSessionManager({
+  authDir: './sesiones',
+  config: { printQRInTerminal: false },
+  // se llama con cada socket nuevo (también tras reconectar)
+  setup: (sock, id) => {
+    sock.ev.on('messages.upsert', async ({ messages }) => {
+      await sock.reply(messages[0], `Hola desde la sesión ${id}`)
+    })
+  }
+})
+
+sessions.on('session.qr', ({ id, qr }) => console.log(id, 'escanea:', qr))
+sessions.on('session.pairing-code', ({ id, code }) => console.log(id, 'código:', code))
+sessions.on('session.open', ({ id, user }) => console.log(id, 'conectado como', user?.id))
+sessions.on('session.logged-out', ({ id }) => console.log(id, 'cerró sesión'))
+
+await sessions.start('ventas')                                  // QR
+await sessions.start('soporte', { pairingNumber: '51910227479' }) // código de vinculación
+await sessions.startAll()   // restaura todas las sesiones guardadas al arrancar
+
+sessions.get('ventas')      // el socket
+sessions.list()             // estado de cada sesión
+await sessions.stop('ventas')    // cierra pero conserva el login
+await sessions.logout('ventas')  // cierra sesión en WhatsApp y borra el login
+await sessions.stopAll()
+```
+
+Los ids solo admiten letras, números, `_`, `-` y `.` (son nombres de carpeta).
 
 ## 🎛️ Variables de entorno
 
