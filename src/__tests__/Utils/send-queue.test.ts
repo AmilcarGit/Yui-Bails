@@ -89,8 +89,10 @@ describe('makeSendQueue', () => {
 		const { queue } = setup({ maxQueueSize: 1, typing: false })
 		const a = queue.sendMessage('a@s.whatsapp.net', { text: '1' })
 		const b = queue.sendMessage('a@s.whatsapp.net', { text: '2' })
-		await expect(queue.sendMessage('a@s.whatsapp.net', { text: '3' })).rejects.toThrow('full')
+		const c = queue.sendMessage('a@s.whatsapp.net', { text: '3' })
+		// clear synchronously: `a` is already being sent, `b` is still waiting
 		expect(queue.queue.clear()).toBe(1)
+		await expect(c).rejects.toThrow('full')
 		await expect(b).rejects.toThrow('cleared')
 		await expect(a).resolves.toBeDefined()
 	})

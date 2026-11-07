@@ -1,5 +1,5 @@
-import { jest } from '@jest/globals'
 import { Boom } from '@hapi/boom'
+import { jest } from '@jest/globals'
 import { EventEmitter } from 'events'
 import { promises as fs } from 'fs'
 import os from 'os'
