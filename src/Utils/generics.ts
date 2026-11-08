@@ -2,7 +2,7 @@ import { Boom } from '@hapi/boom'
 import { createHash, randomBytes } from 'crypto'
 import type Long from 'long'
 import { proto } from '../../WAProto/index.js'
-const yuiVersion = [2, 3000, 1044006379]
+const yuiVersion = [2, 3000, 1053624037]
 import type { ConnectionState, WACallUpdateType, WAMessageKey, WAVersion, YuiEventEmitter, YuiEventMap } from '../Types'
 import { DisconnectReason } from '../Types'
 import { type BinaryNode, getAllBinaryNodeChildren, jidDecode } from '../WABinary'
