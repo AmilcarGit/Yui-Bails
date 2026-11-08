@@ -135,6 +135,23 @@ export const makeReplyTools = (sock: ReplySocket, logger?: { warn: (...args: any
 		if (used.size > MAX_USED) used.delete(used.values().next().value as string)
 	}
 
+	const dispatch = async (msg: WAMessage, reply: ButtonReply) => {
+		for (const handler of [...handlers]) {
+			if (!handler.types.includes(reply.type) || !matches(handler.matcher, reply)) continue
+
+			if (handler.options.once && reply.quotedId) {
+				if (used.has(reply.quotedId)) {
+					await handler.options.onUsed?.(msg, reply)
+					continue
+				}
+
+				markUsed(reply.quotedId)
+			}
+
+			await handler.run(msg, reply)
+		}
+	}
+
 	sock.ev.on('messages.upsert', async ({ messages, type }: { messages: WAMessage[]; type: string }) => {
 		if (type !== 'notify') return
 
@@ -154,22 +171,7 @@ export const makeReplyTools = (sock: ReplySocket, logger?: { warn: (...args: any
 
 				// 2) button / list handlers
 				const reply = getReply(msg)
-				if (!reply) continue
-
-				for (const handler of [...handlers]) {
-					if (!handler.types.includes(reply.type) || !matches(handler.matcher, reply)) continue
-
-					if (handler.options.once && reply.quotedId) {
-						if (used.has(reply.quotedId)) {
-							await handler.options.onUsed?.(msg, reply)
-							continue
-						}
-
-						markUsed(reply.quotedId)
-					}
-
-					await handler.run(msg, reply)
-				}
+				if (reply) await dispatch(msg, reply)
 			} catch (error) {
 				logger?.warn({ error }, 'a reply handler failed')
 			}

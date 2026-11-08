@@ -16,6 +16,7 @@ const setup = () => {
 		ev.emit('messages.upsert', { messages: [msg], type })
 		await new Promise(resolve => setImmediate(resolve))
 	}
+
 	return { tools, upsert }
 }
 
