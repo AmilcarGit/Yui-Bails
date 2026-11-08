@@ -104,3 +104,42 @@ describe('sendSafe', () => {
 		expect(final.status).toBe('sent')
 	})
 })
+
+describe('carousel and buttons helpers', () => {
+	const make = (sendMessage: HelperSocket['sendMessage']) =>
+		makeHelpers({
+			ev: { on: () => undefined, emit: () => undefined },
+			sendMessage,
+			updateMediaMessage: jest.fn()
+		} as unknown as HelperSocket)
+
+	it('sendCarousel passes the cards as `carousel` and validates them', async () => {
+		const sendMessage = jest.fn(async () => msg('C1'))
+		const helpers = make(sendMessage as unknown as HelperSocket['sendMessage'])
+		await helpers.sendCarousel('1@s.whatsapp.net', { text: 'Hola', cards: [{ buttons: [{ id: 'a', text: 'A' }] }] })
+
+		expect(sendMessage).toHaveBeenCalledWith(
+			'1@s.whatsapp.net',
+			{ text: 'Hola', carousel: [{ buttons: [{ id: 'a', text: 'A' }] }] },
+			undefined
+		)
+		expect(() => helpers.sendCarousel('1@s.whatsapp.net', { cards: [] })).toThrow('at least one card')
+	})
+
+	it('disableButtons edits the message into text, and says false when WhatsApp refuses', async () => {
+		const original = {
+			key: { remoteJid: '1@s.whatsapp.net', id: 'M1', fromMe: true },
+			message: { interactiveMessage: { body: { text: 'Elige' } } }
+		} as WAMessage
+
+		const sendMessage = jest.fn(async () => msg('E1'))
+		const ok = await make(sendMessage as unknown as HelperSocket['sendMessage']).disableButtons(original)
+		expect(ok).toBe(true)
+		expect(sendMessage).toHaveBeenCalledWith('1@s.whatsapp.net', { text: 'Elige', edit: original.key })
+
+		const refuse = make(async () => {
+			throw new Error('not editable')
+		})
+		expect(await refuse.disableButtons(original, '✅ usado')).toBe(false)
+	})
+})

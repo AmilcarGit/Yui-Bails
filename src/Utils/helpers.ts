@@ -1,6 +1,7 @@
 import { Boom } from '@hapi/boom'
 import type {
 	ButtonSpec,
+	CarouselCard,
 	MiscMessageGenerationOptions,
 	PollMessageOptions,
 	WAMessage,
@@ -106,6 +107,13 @@ export type SendButtonsOptions = {
 	buttons: ButtonSpec[]
 	/** classic buttons render in every client; `interactive` (default) uses native flow */
 	buttonsFormat?: 'interactive' | 'buttons'
+}
+
+export type SendCarouselOptions = {
+	cards: CarouselCard[]
+	text?: string
+	title?: string
+	footer?: string
 }
 
 export type SendListOptions = {
@@ -337,6 +345,39 @@ export const makeHelpers = (sock: HelperSocket, config: HelperConfig = {}) => {
 			}
 
 			return sock.sendMessage(jid, { ...rest, buttons }, options)
+		},
+
+		/**
+		 * Sends a carousel: up to 10 cards that scroll sideways, each with its own image or video,
+		 * texts and buttons.
+		 */
+		sendCarousel: (jid: string, { cards, ...rest }: SendCarouselOptions, options?: MiscMessageGenerationOptions) => {
+			if (!Array.isArray(cards) || !cards.length) {
+				throw new Boom('sendCarousel needs at least one card', { statusCode: 400 })
+			}
+
+			return sock.sendMessage(jid, { ...rest, carousel: cards }, options)
+		},
+
+		/**
+		 * Tries to remove the buttons from a message you sent (by editing it into plain text), so
+		 * nobody taps them again. WhatsApp may refuse to edit some interactive messages: it returns
+		 * `false` then. For a guaranteed "use once", pass `{ once: true }` to `onButton`.
+		 */
+		disableButtons: async (msg: WAMessage, text?: string): Promise<boolean> => {
+			const content = msg.message?.interactiveMessage || msg.message?.buttonsMessage
+			const original =
+				(content && 'body' in content ? content.body?.text : undefined) ||
+				(content && 'contentText' in content ? content.contentText : undefined) ||
+				''
+
+			try {
+				await sock.sendMessage(chatOf(msg), { text: text ?? (original || '✅'), edit: msg.key })
+				return true
+			} catch (error) {
+				config.logger?.debug({ error }, 'could not edit the message to disable its buttons')
+				return false
+			}
 		},
 
 		/** Sends a list (dropdown) message. */

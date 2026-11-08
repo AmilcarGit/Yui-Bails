@@ -1411,6 +1411,11 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					} as BinaryNode)
 				}
 
+				// `ai: true` marks the message as sent by a business bot (shows the AI icon)
+				if ('ai' in content && content.ai) {
+					additionalNodes.push({ tag: 'bot', attrs: { biz_bot: '1' } } as BinaryNode)
+				}
+
 				await relayMessage(jid, fullMsg.message!, {
 					messageId: fullMsg.key.id!,
 					useCachedGroupMetadata: options.useCachedGroupMetadata,

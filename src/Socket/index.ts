@@ -5,6 +5,7 @@ import { installConsoleFilter } from '../Utils/console-filter'
 import { makeGroupMetadataCache } from '../Utils/group-cache'
 import { type HelperSocket, makeHelpers } from '../Utils/helpers'
 import { makeMessageStore } from '../Utils/message-store'
+import { makeReplyTools, type ReplySocket } from '../Utils/replies'
 import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
 import { makeCommunitiesSocket } from './communities'
 
@@ -80,7 +81,10 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		? makeSendQueue(loose, typeof newConfig.sendQueue === 'object' ? newConfig.sendQueue : {})
 		: { sendMessage: sock.sendMessage, sendMessageNow: sock.sendMessage, queue: { size: 0, clear: () => 0 } }
 
-	return Object.assign(sock, helpers, sendQueue, { messageStore: store, groupCache })
+	// onButton / onList / onReply / awaitReply use the (already extended) socket's getSender
+	const replies = makeReplyTools(Object.assign(loose, helpers) as unknown as ReplySocket, newConfig.logger)
+
+	return Object.assign(sock, helpers, replies, sendQueue, { messageStore: store, groupCache })
 }
 
 export default makeWASocket

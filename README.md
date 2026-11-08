@@ -192,6 +192,65 @@ sock.getPollVotes(encuesta.key) // resultado actual
 
 > Para recibir los votos de encuestas que no envió este proceso, implementa `getMessage` en la config.
 
+## 🎛️ Botones avanzados
+
+### Carrusel de tarjetas
+
+Hasta 10 tarjetas que se deslizan, cada una con su imagen o video, textos y botones.
+
+```js
+await sock.sendCarousel(jid, {
+  text: 'Nuestro catálogo',
+  footer: 'Yui-Bails',
+  cards: [
+    {
+      image: { url: 'https://example.com/a.jpg' },
+      title: 'Plan básico',
+      body: 'Ideal para empezar',
+      buttons: [{ id: 'comprar_basico', text: 'Comprar' }, { text: 'Ver web', url: 'https://example.com' }]
+    },
+    { image: bufferDeImagen, title: 'Plan pro', body: 'Todo incluido', buttons: [{ id: 'comprar_pro', text: 'Comprar' }] }
+  ]
+})
+```
+
+### Responder a botones y menús sin complicarte
+
+```js
+// se ejecuta cuando alguien toca el botón o la fila con ese id (string, RegExp o función)
+sock.onButton('comprar_basico', async (msg, reply) => {
+  await sock.reply(msg, `Elegiste: ${reply.text}`)
+}, { once: true, onUsed: msg => sock.reply(msg, 'Este menú ya fue usado ✋') }) // solo el primer toque por menú
+
+sock.onList(/^fila_/, async (msg, reply) => sock.reply(msg, `Fila ${reply.id}`))
+sock.onReply(r => r.id.startsWith('x_'), handler) // botones y listas a la vez
+
+// esperar la siguiente respuesta de la misma persona en el mismo chat
+await sock.reply(msg, '¿Cómo te llamas?')
+const respuesta = await sock.awaitReply(msg, { timeoutMs: 30_000 })
+if (!respuesta) return sock.reply(msg, '⏱️ Se acabó el tiempo')
+```
+
+`onButton`, `onList` y `onReply` devuelven una función para quitar el manejador. `getReply(msg)` también está exportada si quieres leer el toque tú mismo.
+
+### Quitar los botones de un mensaje
+
+```js
+const enviado = await sock.sendButtons(jid, { text: 'Elige', buttons })
+// ...cuando ya lo usaron:
+await sock.disableButtons(enviado, '✅ Opción elegida')
+```
+
+`disableButtons` edita el mensaje para dejarlo como texto. WhatsApp puede negarse a editar algunos mensajes interactivos y entonces devuelve `false`; para garantizar un solo uso usa `{ once: true }` en `onButton`.
+
+### Icono de IA
+
+```js
+await sock.sendMessage(jid, { text: 'Hola, soy un bot', ai: true })
+```
+
+Marca el mensaje como enviado por un bot de negocio para que WhatsApp muestre el icono de IA. Que se muestre depende de la versión de WhatsApp de quien lo recibe.
+
 ## 🧱 Estabilidad integrada
 
 Cosas que casi todos los bots acaban programando a mano, ya resueltas y activas por defecto:

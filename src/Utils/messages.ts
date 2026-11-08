@@ -16,6 +16,7 @@ import type {
 	AnyMessageContent,
 	ButtonsMessageContent,
 	ButtonSpec,
+	CarouselMessageContent,
 	DownloadableMessage,
 	ListMessageContent,
 	MessageContentGenerationOptions,
@@ -122,6 +123,77 @@ const assertColor = async (color: any) => {
 
 		assertedColor = parseInt(hex, 16)
 		return assertedColor
+	}
+}
+
+/** the maximum number of cards WhatsApp renders in a carousel */
+export const MAX_CAROUSEL_CARDS = 10
+
+const toNativeButton = (b: ButtonSpec) => {
+	// raw native flow button ({ name, buttonParamsJson }) passes straight through
+	if (b.name && (b.buttonParamsJson || b.paramsJson)) {
+		return { name: b.name, buttonParamsJson: b.buttonParamsJson || b.paramsJson }
+	}
+
+	const text = b.text || b.buttonText?.displayText || ''
+	return buildNativeFlowButton({ ...b, text, id: b.id || b.buttonId || text })
+}
+
+/** Builds an InteractiveMessage carousel: every card has its own media, texts and buttons. */
+export const buildCarouselMessage = async (
+	content: Pick<CarouselMessageContent, 'carousel' | 'text' | 'title' | 'footer'>,
+	options: MessageContentGenerationOptions
+): Promise<proto.IMessage> => {
+	const cards = content.carousel
+	if (!Array.isArray(cards) || !cards.length) {
+		throw new Boom('A carousel needs at least one card', { statusCode: 400 })
+	}
+
+	if (cards.length > MAX_CAROUSEL_CARDS) {
+		throw new Boom(`A carousel can have at most ${MAX_CAROUSEL_CARDS} cards`, { statusCode: 400 })
+	}
+
+	const built: proto.Message.IInteractiveMessage[] = []
+	for (const [index, card] of cards.entries()) {
+		if (!Array.isArray(card.buttons) || !card.buttons.length) {
+			throw new Boom(`Carousel card ${index + 1} needs at least one button`, { statusCode: 400 })
+		}
+
+		const header: proto.Message.InteractiveMessage.IHeader = {
+			title: card.title || '',
+			subtitle: '',
+			hasMediaAttachment: false
+		}
+
+		if (card.image || card.video) {
+			const media = await prepareWAMessageMedia(
+				(card.image ? { image: card.image } : { video: card.video }) as AnyMediaMessageContent,
+				options
+			)
+			header.hasMediaAttachment = true
+			if (media.imageMessage) header.imageMessage = media.imageMessage
+			if (media.videoMessage) header.videoMessage = media.videoMessage
+		}
+
+		built.push({
+			header,
+			body: { text: card.body || '' },
+			footer: { text: card.footer || '' },
+			nativeFlowMessage: { buttons: card.buttons.map(toNativeButton), messageParamsJson: '' }
+		})
+	}
+
+	return {
+		interactiveMessage: {
+			header: { title: content.title || '', subtitle: '', hasMediaAttachment: false },
+			body: { text: content.text || '' },
+			footer: { text: content.footer || '' },
+			carouselMessage: {
+				cards: built,
+				messageVersion: 1,
+				carouselCardType: proto.Message.InteractiveMessage.CarouselMessage.CarouselCardType.HSCROLL_CARDS
+			}
+		}
 	}
 }
 
@@ -611,6 +683,8 @@ export const generateWAMessageContent = async (
 				initiatedByMe: true
 			}
 		}
+	} else if (hasNonNullishProperty(message, 'carousel')) {
+		m = await buildCarouselMessage(message, options)
 	} else if (hasNonNullishProperty(message, 'buttons') || hasNonNullishProperty(message, 'nativeFlow')) {
 		const media = message as unknown as Record<string, unknown>
 		if (media.image || media.video || media.document) {

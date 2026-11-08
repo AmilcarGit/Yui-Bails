@@ -126,6 +126,11 @@ type ViewOnce = {
 	viewOnce?: boolean
 }
 
+type AiFlag = {
+	/** shows the "AI" icon on the message (sent with the business-bot marker) */
+	ai?: boolean
+}
+
 type Editable = {
 	edit?: WAMessageKey
 }
@@ -271,6 +276,26 @@ export type ButtonsMessageContent = {
 } & Mentionable &
 	Contextable
 
+/** one card of a carousel: optional image/video, texts and its own buttons */
+export type CarouselCard = {
+	image?: WAMediaUpload
+	video?: WAMediaUpload
+	title?: string
+	body?: string
+	footer?: string
+	/** every card needs at least one button */
+	buttons: ButtonSpec[]
+}
+
+/** horizontally scrolling cards (up to 10), each with its own media and buttons */
+export type CarouselMessageContent = {
+	carousel: CarouselCard[]
+	text?: string
+	title?: string
+	footer?: string
+} & Mentionable &
+	Contextable
+
 /** classic list message (works in private chats) */
 export type ListMessageContent = {
 	sections: any[]
@@ -349,8 +374,10 @@ export type AnyRegularMessageContent = (
 	| RequestPhoneNumber
 	| ButtonsMessageContent
 	| ListMessageContent
+	| CarouselMessageContent
 ) &
-	ViewOnce
+	ViewOnce &
+	AiFlag
 
 export type AnyMessageContent =
 	| AnyRegularMessageContent
