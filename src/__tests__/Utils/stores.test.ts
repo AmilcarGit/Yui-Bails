@@ -1,9 +1,9 @@
+import { Boom } from '@hapi/boom'
 import { jest } from '@jest/globals'
 import type { GroupMetadata, WAMessage } from '../../Types'
 import { makeGroupMetadataCache } from '../../Utils/group-cache'
 import { type HelperSocket, makeHelpers, type SendResult } from '../../Utils/helpers'
 import { makeMessageStore } from '../../Utils/message-store'
-import { Boom } from '@hapi/boom'
 
 const msg = (id: string, text = 'hola') =>
 	({ key: { remoteJid: '1@s.whatsapp.net', id }, message: { conversation: text } }) as WAMessage
