@@ -69,6 +69,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 			groupCache.delete(id)
 		})
 	}
+
 	const loose = sock as unknown as HelperSocket & QueueSocket
 
 	// `Object.assign` (not a spread): the socket has getters such as `user` that must stay live
