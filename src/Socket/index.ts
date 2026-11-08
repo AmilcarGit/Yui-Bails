@@ -84,7 +84,8 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	// onButton / onList / onReply / awaitReply use the (already extended) socket's getSender
 	const replies = makeReplyTools(Object.assign(loose, helpers) as unknown as ReplySocket, newConfig.logger)
 
-	return Object.assign(sock, helpers, replies, sendQueue, { messageStore: store, groupCache })
+	// at most three sources: `Object.assign` loses its types with more
+	return Object.assign(sock, helpers, replies, { ...sendQueue, messageStore: store, groupCache })
 }
 
 export default makeWASocket

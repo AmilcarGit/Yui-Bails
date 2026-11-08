@@ -2,7 +2,7 @@ import { jest } from '@jest/globals'
 import { EventEmitter } from 'events'
 import type { WAMessage } from '../../Types'
 import { getSenderIds } from '../../Utils/helpers'
-import { getReply, makeReplyTools } from '../../Utils/replies'
+import { getReply, makeReplyTools, type ReplyHandler } from '../../Utils/replies'
 
 const CHAT = '1203@g.us'
 
@@ -82,9 +82,9 @@ const tap = (id: string, quotedId: string, user = 'u1') =>
 describe('makeReplyTools', () => {
 	it('onButton matches by string, regex and function, and can be removed', async () => {
 		const { tools, upsert } = setup()
-		const byString = jest.fn()
-		const byRegex = jest.fn()
-		const byFn = jest.fn()
+		const byString = jest.fn<ReplyHandler>()
+		const byRegex = jest.fn<ReplyHandler>()
+		const byFn = jest.fn<ReplyHandler>()
 		const off = tools.onButton('menu', byString)
 		tools.onButton(/^me/, byRegex)
 		tools.onButton(r => r.id.endsWith('nu'), byFn)
@@ -101,7 +101,7 @@ describe('makeReplyTools', () => {
 
 	it('onList only fires for list rows', async () => {
 		const { tools, upsert } = setup()
-		const handler = jest.fn()
+		const handler = jest.fn<ReplyHandler>()
 		tools.onList('x', handler)
 
 		await upsert(tap('x', 'Q1')) // a button, not a list
@@ -119,8 +119,8 @@ describe('makeReplyTools', () => {
 
 	it('once handles only the first tap on each menu', async () => {
 		const { tools, upsert } = setup()
-		const run = jest.fn()
-		const onUsed = jest.fn()
+		const run = jest.fn<ReplyHandler>()
+		const onUsed = jest.fn<ReplyHandler>()
 		tools.onButton('ok', run, { once: true, onUsed })
 
 		await upsert(tap('ok', 'MENU1', 'u1'))
@@ -133,7 +133,7 @@ describe('makeReplyTools', () => {
 
 	it('ignores own messages and non-notify upserts, and survives failing handlers', async () => {
 		const { tools, upsert } = setup()
-		const run = jest.fn(async () => {
+		const run = jest.fn<ReplyHandler>(async () => {
 			throw new Error('boom')
 		})
 		tools.onButton('a', run)
