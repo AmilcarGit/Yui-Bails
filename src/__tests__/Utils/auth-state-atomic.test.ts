@@ -40,7 +40,8 @@ describe('useMultiFileAuthState (safe writes)', () => {
 		const second = await useMultiFileAuthState(dir)
 		expect(second.state.creds.registrationId).toBe(first.state.creds.registrationId)
 		// and the file on disk is healthy again
-		expect(() => JSON.parse(await fs.readFile(path.join(dir, 'creds.json'), 'utf-8'))).not.toThrow()
+		const onDisk = await fs.readFile(path.join(dir, 'creds.json'), 'utf-8')
+		expect(() => JSON.parse(onDisk)).not.toThrow()
 	})
 
 	it('does not keep a damaged file as the backup', async () => {
