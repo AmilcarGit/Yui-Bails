@@ -716,6 +716,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 							logger.trace({ jid, participants: groupData.participants.length }, 'using cached group metadata')
 						} else if (!isStatus) {
 							groupData = await groupMetadata(jid) // TODO: start storing group participant list + addr mode in Signal & stop relying on this
+							config.onGroupMetadata?.(jid, groupData)
 						}
 
 						return groupData

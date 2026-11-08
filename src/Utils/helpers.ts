@@ -133,6 +133,25 @@ export type PollVotes = {
 	voter: string
 }
 
+/**
+ * How a send ended:
+ * - `sent`: WhatsApp accepted it
+ * - `failed`: it definitely did not go out
+ * - `unknown`: it timed out or the connection dropped mid-send, so it may still be delivered
+ */
+export type SendResult =
+	| { status: 'sent'; message: WAMessage | undefined }
+	| { status: 'failed'; error: unknown }
+	| { status: 'unknown'; error: unknown; settled: Promise<SendResult> }
+
+export type SendSafeOptions = {
+	/** how long to wait before giving up with `unknown`, in ms. Default 20000 */
+	timeoutMs?: number
+}
+
+/** errors that do not prove the message was not sent: the connection died or the wait ran out */
+const UNCERTAIN_CODES = [408, 428, 440]
+
 type Content = Record<string, unknown>
 type SendFn = (jid: string, content: any, options?: MiscMessageGenerationOptions) => Promise<WAMessage | undefined>
 
@@ -274,6 +293,42 @@ export const makeHelpers = (sock: HelperSocket, config: HelperConfig = {}) => {
 
 		/** Reacts to a message with an emoji (empty string removes the reaction). */
 		react: (msg: WAMessage, emoji: string) => sock.sendMessage(chatOf(msg), { react: { text: emoji, key: msg.key } }),
+
+		/**
+		 * Like `sendMessage`, but never throws: it tells `sent`, `failed` or `unknown` apart.
+		 * `unknown` means the connection dropped or the wait timed out, so the message may still
+		 * arrive; its `settled` promise gives the final outcome.
+		 */
+		sendSafe: async (
+			jid: string,
+			content: string | Content,
+			options?: MiscMessageGenerationOptions,
+			{ timeoutMs = 20_000 }: SendSafeOptions = {}
+		): Promise<SendResult> => {
+			const run: Promise<SendResult> = Promise.resolve()
+				.then(() => sock.sendMessage(jid, toContent(content), options))
+				.then<SendResult>(message => ({ status: 'sent', message }))
+				.catch<SendResult>(error => {
+					const code = (error as Boom | undefined)?.output?.statusCode
+					return UNCERTAIN_CODES.includes(code as number)
+						? { status: 'unknown', error, settled: Promise.resolve({ status: 'failed', error }) }
+						: { status: 'failed', error }
+				})
+
+			let timer: ReturnType<typeof setTimeout> | undefined
+			const timeout = new Promise<SendResult>(resolve => {
+				timer = setTimeout(() => {
+					const error = new Boom('Timed out waiting for the send to finish', { statusCode: 408 })
+					resolve({ status: 'unknown', error, settled: run })
+				}, timeoutMs)
+			})
+
+			try {
+				return await Promise.race([run, timeout])
+			} finally {
+				clearTimeout(timer)
+			}
+		},
 
 		/** Sends a message with buttons. */
 		sendButtons: (jid: string, { buttons, ...rest }: SendButtonsOptions, options?: MiscMessageGenerationOptions) => {

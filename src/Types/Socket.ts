@@ -164,4 +164,20 @@ export type SocketConfig = {
 	 * Off by default.
 	 */
 	sendQueue?: boolean | SendQueueOptions
+
+	/**
+	 * Keeps the latest messages in memory so WhatsApp's delivery retries (and poll votes) work
+	 * without writing `getMessage`. A `getMessage` you provide is asked first.
+	 * On by default; `false` turns it off, an object sets `max` (default 1000).
+	 */
+	messageStore?: boolean | { max?: number }
+
+	/**
+	 * Caches each group's member list so sending to a group does not ask WhatsApp for it every time.
+	 * On by default (5 minutes); `false` turns it off. Ignored when you provide `cachedGroupMetadata`.
+	 */
+	groupMetadataCache?: boolean | { ttlMs?: number; max?: number }
+
+	/** internal: called with the metadata the socket just fetched, to fill the cache */
+	onGroupMetadata?: (jid: string, metadata: GroupMetadata) => void
 }

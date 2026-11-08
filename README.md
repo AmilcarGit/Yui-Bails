@@ -192,6 +192,27 @@ sock.getPollVotes(encuesta.key) // resultado actual
 
 > Para recibir los votos de encuestas que no envió este proceso, implementa `getMessage` en la config.
 
+## 🧱 Estabilidad integrada
+
+Cosas que casi todos los bots acaban programando a mano, ya resueltas y activas por defecto:
+
+- **Sesión a prueba de cortes:** `useMultiFileAuthState` escribe `creds.json` en un archivo temporal y lo renombra, así un corte de luz o un cierre a mitad de guardado no lo deja a medias. Guarda además `creds.json.bak` (solo de archivos sanos) y, si el principal se daña, lo restaura solo.
+- **Reintentos sin configurar nada:** la librería guarda en memoria los últimos mensajes (`messageStore`, 1000 por defecto) para responder a los reintentos de WhatsApp y a los votos de encuestas. Tu `getMessage`, si lo pasas, tiene prioridad. `sock.messageStore` te da acceso.
+- **Caché de grupos:** la lista de miembros de cada grupo se guarda 5 minutos (se renueva sola si el grupo cambia), para no pedirla en cada envío y evitar límites. Si pasas tu propio `cachedGroupMetadata`, se respeta el tuyo.
+- **Resultado claro de cada envío:** `sock.sendSafe()` nunca lanza error y dice `sent`, `failed` o `unknown` (se agotó el tiempo o se cayó la conexión: puede que sí llegue; su `settled` da el resultado final).
+
+```js
+const sock = makeWASocket({
+  auth: state,
+  messageStore: { max: 2000 },                 // o false para desactivarlo
+  groupMetadataCache: { ttlMs: 10 * 60_000 }   // o false para desactivarla
+})
+
+const r = await sock.sendSafe(jid, 'hola', undefined, { timeoutMs: 15_000 })
+if (r.status === 'sent') console.log('enviado', r.message.key.id)
+if (r.status === 'unknown') console.log('quizá llegó:', (await r.settled).status)
+```
+
 ## 🛡️ Cola anti-ban (`sendQueue`)
 
 Desactivada por defecto. Al activarla, todo lo que pase por `sock.sendMessage` (incluidos `reply`, `sendButtons`…) sale **uno a uno**, con pausas aleatorias, un límite por chat y el indicador "escribiendo…" proporcional al texto.

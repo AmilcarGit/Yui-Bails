@@ -1,5 +1,5 @@
 import { Mutex } from 'async-mutex'
-import { mkdir, readFile, stat, unlink, writeFile } from 'fs/promises'
+import { copyFile, mkdir, readFile, rename, stat, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { proto } from '../../WAProto/index.js'
 import type { AuthenticationCreds, AuthenticationState, SignalDataTypeMap } from '../Types'
@@ -10,6 +10,15 @@ import { BufferJSON } from './generics'
 // https://github.com/nodejs/node/issues/26338
 // Use a Map to store mutexes for each file path
 const fileLocks = new Map<string, Mutex>()
+
+const isValidJson = (text: string) => {
+	try {
+		JSON.parse(text)
+		return true
+	} catch {
+		return false
+	}
+}
 
 // Get or create a mutex for a specific file path
 const getFileLock = (path: string): Mutex => {
@@ -38,8 +47,22 @@ export const useMultiFileAuthState = async (
 		const mutex = getFileLock(filePath)
 
 		return mutex.acquire().then(async release => {
+			// write to a temporary file and rename it: `rename` is atomic, so a crash or a power
+			// cut in the middle of a write can never leave a half-written file behind
+			const tempPath = `${filePath}.tmp`
 			try {
-				await writeFile(filePath, JSON.stringify(data, BufferJSON.replacer))
+				await writeFile(tempPath, JSON.stringify(data, BufferJSON.replacer))
+
+				if (file === 'creds.json') {
+					// keep the last readable login as a backup (only if it is intact)
+					const current = await readFile(filePath, { encoding: 'utf-8' }).catch(() => undefined)
+					if (current && isValidJson(current)) await copyFile(filePath, `${filePath}.bak`).catch(() => {})
+				}
+
+				await rename(tempPath, filePath)
+			} catch (error) {
+				await unlink(tempPath).catch(() => {})
+				throw error
 			} finally {
 				release()
 			}
@@ -53,8 +76,17 @@ export const useMultiFileAuthState = async (
 
 			return await mutex.acquire().then(async release => {
 				try {
-					const data = await readFile(filePath, { encoding: 'utf-8' })
-					return JSON.parse(data, BufferJSON.reviver)
+					try {
+						const data = await readFile(filePath, { encoding: 'utf-8' })
+						return JSON.parse(data, BufferJSON.reviver)
+					} catch (error) {
+						// a damaged creds.json is replaced by its last good backup
+						if (file !== 'creds.json') throw error
+						const backup = await readFile(`${filePath}.bak`, { encoding: 'utf-8' })
+						const restored = JSON.parse(backup, BufferJSON.reviver)
+						await copyFile(`${filePath}.bak`, filePath).catch(() => {})
+						return restored
+					}
 				} finally {
 					release()
 				}
