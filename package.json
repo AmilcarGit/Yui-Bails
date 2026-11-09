@@ -1,7 +1,7 @@
 {
-  "name": "yui-bails",
+  "name": "@yui-bails/baileys",
   "type": "module",
-  "version": "7.0.0-rc13",
+  "version": "1.0.0",
   "description": "A WebSockets library for interacting with WhatsApp Web",
   "keywords": [
     "whatsapp",
@@ -9,7 +9,11 @@
   ],
   "homepage": "https://github.com/AmilcarGit/Yui-Bails/",
   "repository": {
-    "url": "git@github.com:AmilcarGit/Yui-Bails.git"
+    "type": "git",
+    "url": "git+https://github.com/AmilcarGit/Yui-Bails.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "author": "AmilcarGit",
