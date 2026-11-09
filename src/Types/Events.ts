@@ -62,6 +62,14 @@ export type YuiEventMap = {
 
 	'messages.delete': { keys: WAMessageKey[] } | { jid: string; all: true }
 	'messages.update': WAMessageUpdate[]
+	/** how far a message you sent got: sent, delivered, read, played (or failed) */
+	'message.status': {
+		key: WAMessageKey
+		status: 'failed' | 'sent' | 'delivered' | 'read' | 'played'
+		/** in groups, the member this receipt comes from */
+		userJid?: string
+		at: number
+	}
 	/** a vote was cast (or changed) in a poll; `votes` has the full, current result */
 	'poll.votes': {
 		pollKey: WAMessageKey

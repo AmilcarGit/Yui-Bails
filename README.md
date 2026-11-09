@@ -251,6 +251,59 @@ await sock.sendMessage(jid, { text: 'Hola, soy un bot', ai: true })
 
 Marca el mensaje como enviado por un bot de negocio para que WhatsApp muestre el icono de IA. Que se muestre depende de la versión de WhatsApp de quien lo recibe.
 
+## 📊 Datos reales del bot
+
+Nada estimado: son contadores y mediciones de lo que hace tu bot.
+
+```js
+// Estado de la conexión, con un ping real a los servidores de WhatsApp
+const salud = await sock.health()
+// { state: 'open', uptimeMs, connectedMs, reconnects, queueSize,
+//   memory: { rssMB, heapUsedMB }, latencyMs: 142 }   ← latencyMs se mide en ese momento
+await sock.health({ ping: false }) // sin tocar la red
+
+// Contadores desde que arrancó (o desde resetStats)
+const stats = sock.getStats()
+// { since, sent, received, failed, sentByType: { text: 12, image: 2 }, receivedByType: {...} }
+
+// Hasta dónde llegó cada mensaje que enviaste
+sock.ev.on('message.status', ({ key, status, userJid }) => {
+  // status: 'sent' | 'delivered' | 'read' | 'played' | 'failed'
+  // en grupos llega uno por miembro (userJid)
+})
+sock.getMessageStatus(mensaje.key) // último estado conocido
+```
+
+`health()` no inventa nada: si no hay conexión devuelve `latencyMs: undefined` y el motivo en `pingError`. El estado de entrega solo llega para mensajes enviados por esta cuenta, y WhatsApp no informa "leído" si la otra persona desactivó las confirmaciones de lectura.
+
+## 👮 Permisos de grupo (con LID)
+
+Entienden los dos tipos de identidad de WhatsApp, así que funcionan aunque el grupo muestre LIDs en lugar de números.
+
+```js
+await sock.isAdmin(grupo, msg)            // msg, número, jid o el resultado de getSender
+await sock.isAdmin(grupo, '51910227479')
+await sock.isBotAdmin(grupo)
+const admins = await sock.getAdmins(grupo)
+
+await sock.kick(grupo, '51911111111')               // números o jids, uno o varios
+await sock.addMembers(grupo, ['51911111111', '51922222222'])
+await sock.promote(grupo, '51911111111')
+await sock.demote(grupo, '51911111111')
+```
+
+Usan la caché de grupos (se actualiza sola al cambiar miembros). Para expulsar, añadir o dar admin, el bot debe ser admin del grupo.
+
+## 🏷️ Menciones automáticas
+
+Escribe `@número` en un texto o pie de foto y se convierte en mención real; no hace falta armar `mentions`.
+
+```js
+await sock.sendMessage(grupo, { text: 'Hola @51910227479, bienvenido' })
+```
+
+Si el mensaje ya trae su propio `mentions`, se respeta. Solo cuentan números de 7 a 15 dígitos (`@nombre` no). Se desactiva con `autoMentions: false`.
+
 ## 🧱 Estabilidad integrada
 
 Cosas que casi todos los bots acaban programando a mano, ya resueltas y activas por defecto:

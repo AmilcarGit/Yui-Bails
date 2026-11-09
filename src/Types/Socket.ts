@@ -178,6 +178,12 @@ export type SocketConfig = {
 	 */
 	groupMetadataCache?: boolean | { ttlMs?: number; max?: number }
 
+	/**
+	 * Turns `@5191…` written in a text or caption into real mentions when the message does not set
+	 * `mentions` itself. On by default; `false` turns it off.
+	 */
+	autoMentions?: boolean
+
 	/** internal: called with the metadata the socket just fetched, to fill the cache */
 	onGroupMetadata?: (jid: string, metadata: GroupMetadata) => void
 }

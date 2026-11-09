@@ -3,7 +3,10 @@ import type { UserFacingSocketConfig } from '../Types'
 import { printBanner } from '../Utils/banner'
 import { installConsoleFilter } from '../Utils/console-filter'
 import { makeGroupMetadataCache } from '../Utils/group-cache'
+import { type GroupToolsSocket, makeGroupTools } from '../Utils/group-tools'
 import { type HelperSocket, makeHelpers } from '../Utils/helpers'
+import { makeInsights } from '../Utils/insights'
+import { withAutoMentions } from '../Utils/mentions'
 import { makeMessageStore } from '../Utils/message-store'
 import { makeReplyTools, type ReplySocket } from '../Utils/replies'
 import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
@@ -84,8 +87,34 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	// onButton / onList / onReply / awaitReply use the (already extended) socket's getSender
 	const replies = makeReplyTools(Object.assign(loose, helpers) as unknown as ReplySocket, newConfig.logger)
 
+	// real numbers: counters, health with a measured ping, and the `message.status` event
+	const insights = makeInsights(loose as never, { queueSize: () => sendQueue.queue.size })
+
+	// admin checks and moderation shortcuts that understand both phone numbers and LIDs
+	const groups = makeGroupTools(loose as unknown as GroupToolsSocket, {
+		cache: groupCache,
+		getSender: helpers.getSender
+	})
+
+	// every send: `@number` in the text becomes a mention, and the result is counted
+	const decorate = (send: typeof sock.sendMessage): typeof sock.sendMessage =>
+		insights.wrapSend((jid, content, options) =>
+			send(jid, newConfig.autoMentions === false ? content : withAutoMentions(content), options)
+		) as typeof sock.sendMessage
+
 	// at most three sources: `Object.assign` loses its types with more
-	return Object.assign(sock, helpers, replies, { ...sendQueue, messageStore: store, groupCache })
+	return Object.assign(sock, helpers, replies, {
+		...sendQueue,
+		getStats: insights.getStats,
+		resetStats: insights.resetStats,
+		getMessageStatus: insights.getMessageStatus,
+		health: insights.health,
+		...groups,
+		sendMessage: decorate(sendQueue.sendMessage as typeof sock.sendMessage),
+		sendMessageNow: decorate(sendQueue.sendMessageNow as typeof sock.sendMessage),
+		messageStore: store,
+		groupCache
+	})
 }
 
 export default makeWASocket
