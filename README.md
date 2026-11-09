@@ -428,10 +428,11 @@ To run the example script, download or clone the repo and then type the followin
 
 ## Install
 
-Use the stable version:
+Use the stable version (npm):
 ```
-yarn add yui-bails
+npm install yui-bails@npm:@yui-bails/yui-bails
 ```
+The `yui-bails@npm:` part keeps the short name, so `import ... from 'yui-bails'` works.
 
 Use the edge version (no guarantee of stability, but latest fixes + features)
 ```

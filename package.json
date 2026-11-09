@@ -1,13 +1,20 @@
 {
-  "name": "@yui-bails/baileys",
+  "name": "@yui-bails/yui-bails",
   "type": "module",
   "version": "1.0.0",
-  "description": "A WebSockets library for interacting with WhatsApp Web",
+  "description": "Yui-Bails: librería profesional para bots de WhatsApp (helpers, cola anti-ban, multi-sesión, botones y más)",
   "keywords": [
     "whatsapp",
-    "automation"
+    "whatsapp-bot",
+    "bot",
+    "baileys",
+    "automation",
+    "yui-bails"
   ],
   "homepage": "https://github.com/AmilcarGit/Yui-Bails/",
+  "bugs": {
+    "url": "https://github.com/AmilcarGit/Yui-Bails/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AmilcarGit/Yui-Bails.git"
@@ -133,6 +140,9 @@
       "optional": true
     },
     "link-preview-js": {
+      "optional": true
+    },
+    "sharp": {
       "optional": true
     }
   },
