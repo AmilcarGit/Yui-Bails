@@ -1,6 +1,6 @@
 import { DEFAULT_CONNECTION_CONFIG } from '../Defaults'
 import type { UserFacingSocketConfig } from '../Types'
-import { makeAutomation, type AutomationSocket } from '../Utils/automation'
+import { type AutomationSocket, makeAutomation } from '../Utils/automation'
 import { printBanner } from '../Utils/banner'
 import { installConsoleFilter } from '../Utils/console-filter'
 import { makeGroupMetadataCache } from '../Utils/group-cache'
