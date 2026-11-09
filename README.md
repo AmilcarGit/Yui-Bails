@@ -196,6 +196,8 @@ sock.getPollVotes(encuesta.key) // resultado actual
 
 ### Carrusel de tarjetas
 
+> ⚠️ **Experimental:** el carrusel está implementado y probado con tests, pero todavía no lo hemos visto funcionar en un teléfono real. WhatsApp puede cambiar o rechazar estos mensajes.
+
 Hasta 10 tarjetas que se deslizan, cada una con su imagen o video, textos y botones.
 
 ```js
@@ -244,6 +246,8 @@ await sock.disableButtons(enviado, '✅ Opción elegida')
 `disableButtons` edita el mensaje para dejarlo como texto. WhatsApp puede negarse a editar algunos mensajes interactivos y entonces devuelve `false`; para garantizar un solo uso usa `{ once: true }` en `onButton`.
 
 ### Icono de IA
+
+> ⚠️ **Experimental:** el mensaje se envía con la marca de bot, pero no está confirmado que el icono aparezca en todos los teléfonos.
 
 ```js
 await sock.sendMessage(jid, { text: 'Hola, soy un bot', ai: true })
@@ -389,6 +393,38 @@ await sessions.stopAll()
 
 Los ids solo admiten letras, números, `_`, `-` y `.` (son nombres de carpeta).
 
+## 🖥️ Logs legibles y lectura automática
+
+```js
+const sock = makeWASocket({
+  auth: state,
+  prettyLogs: true,           // una línea por mensaje y por cambio de conexión
+  autoRead: true,             // marca como leídos los mensajes nuevos
+  autoPresence: 'unavailable' // al conectar, no te muestra "en línea"
+})
+```
+
+`prettyLogs` imprime algo así:
+
+```
+12:30:01 🟢 Conectado a WhatsApp
+12:30:05 📩 grupo · 51925679896 · Amilcar: .ping
+```
+
+- `autoRead` también acepta `{ groups: false, private: true, delayMs: 1500 }` para elegir dónde leer y esperar un poco antes. No marca como leídos el historial, tus propios mensajes ni los estados.
+- `autoPresence` acepta `'available'` o `'unavailable'`. Con `'unavailable'` WhatsApp te sigue avisando en el teléfono.
+- Todo viene desactivado por defecto.
+
+Si quieres que los errores internos se lean en español en vez de JSON, usa el logger legible:
+
+```js
+import makeWASocket, { makePrettyLogger } from 'yui-bails'
+
+const sock = makeWASocket({ auth: state, logger: makePrettyLogger({ level: 'info' }) })
+```
+
+Traduce los avisos más comunes (por ejemplo `No session found to decrypt message` pasa a "No pude leer un mensaje de 5731…: falta su clave de cifrado. Pídele que lo envíe otra vez.") y esconde el ruido interno que no necesitas.
+
 ## 🎛️ Variables de entorno
 
 | Variable | Efecto |
@@ -416,6 +452,122 @@ Use at your own discretion. Do not spam people with this. We discourage any stal
 - Yui-Bails does not require Selenium or any other browser to be interface with WhatsApp Web, it does so directly using a **WebSocket**.
 - Not running Selenium or Chromium saves you like **half a gig** of ram :/
 - Yui-Bails supports interacting with the multi-device & web versions of WhatsApp.
+
+## 🚀 Cómo agregar Yui-Bails a tu bot, paso a paso
+
+Esta guía es para quien nunca lo ha hecho. Funciona en un PC, en un VPS o en Termux (Android).
+
+### 1. Prepara el entorno
+
+Necesitas **Node.js 20 o más nuevo**. Compruébalo:
+
+```
+node -v
+```
+
+En Termux se instala con `pkg install nodejs git`.
+
+### 2. Crea la carpeta de tu bot
+
+```
+mkdir mi-bot
+cd mi-bot
+npm init -y
+```
+
+Abre el `package.json` que se creó y añade esta línea dentro, para poder usar `import`:
+
+```json
+"type": "module"
+```
+
+### 3. Instala Yui-Bails
+
+```
+npm install yui-bails@npm:@yui-bails/yui-bails
+```
+
+El `yui-bails@npm:` deja el nombre corto, así `import ... from 'yui-bails'` funciona. Si prefieres la versión más nueva directamente de GitHub (puede tener cosas sin publicar):
+
+```
+npm install github:AmilcarGit/Yui-Bails
+```
+
+Para actualizar más adelante, repite el mismo comando que usaste.
+
+### 4. Crea `index.js`
+
+Cambia `NUMERO` por el número que usará el bot (con código de país, sin `+` ni espacios):
+
+```js
+import makeWASocket, { useMultiFileAuthState, DisconnectReason } from 'yui-bails'
+
+const NUMERO = '51999999999'
+
+async function iniciar() {
+  const { state, saveCreds } = await useMultiFileAuthState('./sesion')
+
+  const sock = makeWASocket({
+    auth: state,
+    prettyLogs: true, // logs legibles
+    sendQueue: true   // cola anti-ban
+  })
+
+  sock.ev.on('creds.update', saveCreds)
+
+  // primera vez: pide el código para vincular el número
+  if (!sock.authState.creds.registered) {
+    const codigo = await sock.requestPairingCode(NUMERO)
+    console.log('Tu código de vinculación:', codigo)
+  }
+
+  sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
+    if (connection === 'close') {
+      const codigo = lastDisconnect?.error?.output?.statusCode
+      if (codigo !== DisconnectReason.loggedOut) iniciar() // reconectar
+    }
+  })
+
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    if (type !== 'notify') return
+
+    for (const msg of messages) {
+      const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || ''
+      if (texto === '.ping') await sock.reply(msg, '¡pong! 🏓')
+    }
+  })
+}
+
+iniciar()
+```
+
+### 5. Inicia sesión
+
+```
+node index.js
+```
+
+La primera vez aparece un código de 8 caracteres. En el teléfono del bot abre WhatsApp > Dispositivos vinculados > Vincular un dispositivo > **Vincular con el número de teléfono** y escribe el código. Es lo más cómodo en Termux porque no hay que escanear nada.
+
+La sesión queda guardada en la carpeta `sesion`. No la subas a GitHub ni la compartas: quien la tenga controla tu WhatsApp. Las siguientes veces entra solo, sin pedir código.
+
+**¿Prefieres QR?** Instala `npm install qrcode-terminal`, quita el bloque de `requestPairingCode` y en `connection.update` añade `if (qr) qrcode.generate(qr, { small: true })`, recibiendo `qr` junto a `connection` y con `import qrcode from 'qrcode-terminal'` arriba.
+
+### 6. Pruébalo
+
+Desde **otro** número, escribe `.ping` al número del bot. Debe responder `¡pong! 🏓`.
+
+### Problemas comunes
+
+| Síntoma | Qué hacer |
+|---|---|
+| `sock.reply is not a function` o `sock.sendPoll is not a function` | Tienes una versión vieja. Actualiza con el comando del paso 3. |
+| `Cannot use import statement` | Falta `"type": "module"` en el `package.json`. |
+| `rate-overlimit` | Estás pidiendo demasiado a WhatsApp. Activa `sendQueue: true` y espera unos minutos. |
+| `No session found to decrypt message` | No es tu bot: falta la clave de un miembro. Pídele que escriba de nuevo. |
+| Se desconecta cada tanto | Es normal; el código del paso 4 reconecta solo. Si sale `loggedOut`, borra la carpeta `sesion` y vincula de nuevo. |
+
+Para ver un bot completo con comandos, mira [BaseBot](https://github.com/AmilcarGit/BaseBot).
 
 ## Example
 

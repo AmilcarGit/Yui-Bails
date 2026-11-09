@@ -184,6 +184,21 @@ export type SocketConfig = {
 	 */
 	autoMentions?: boolean
 
+	/**
+	 * Marks incoming messages as read by itself. `true` reads groups and private chats; an object
+	 * picks `groups`, `private` and a `delayMs`. Off by default.
+	 */
+	autoRead?: boolean | { groups?: boolean; private?: boolean; delayMs?: number }
+
+	/** presence sent each time the connection opens: `'available'` (online) or `'unavailable'` (offline) */
+	autoPresence?: 'available' | 'unavailable'
+
+	/**
+	 * Prints one readable line per incoming message and per connection change
+	 * (`12:30:01 📩 grupo · 5191… · Nombre: .ping`). Off by default.
+	 */
+	prettyLogs?: boolean
+
 	/** internal: called with the metadata the socket just fetched, to fill the cache */
 	onGroupMetadata?: (jid: string, metadata: GroupMetadata) => void
 }

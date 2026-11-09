@@ -1,5 +1,6 @@
 import { DEFAULT_CONNECTION_CONFIG } from '../Defaults'
 import type { UserFacingSocketConfig } from '../Types'
+import { makeAutomation, type AutomationSocket } from '../Utils/automation'
 import { printBanner } from '../Utils/banner'
 import { installConsoleFilter } from '../Utils/console-filter'
 import { makeGroupMetadataCache } from '../Utils/group-cache'
@@ -9,6 +10,7 @@ import { type HelperSocket, makeHelpers } from '../Utils/helpers'
 import { makeInsights } from '../Utils/insights'
 import { withAutoMentions } from '../Utils/mentions'
 import { makeMessageStore } from '../Utils/message-store'
+import { attachPrettyEvents } from '../Utils/pretty-log'
 import { makeReplyTools, type ReplySocket } from '../Utils/replies'
 import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
 import { makeCommunitiesSocket } from './communities'
@@ -81,6 +83,10 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	sock.groupMetadata = groupMetadata
 
 	const loose = sock as unknown as HelperSocket & QueueSocket
+
+	// optional: mark messages as read and set the presence by itself
+	makeAutomation(sock as unknown as AutomationSocket, newConfig, { logger: newConfig.logger })
+	if (newConfig.prettyLogs) attachPrettyEvents(sock)
 
 	// `Object.assign` (not a spread): the socket has getters such as `user` that must stay live
 	const helpers = makeHelpers(loose, { logger: newConfig.logger, getMessage: newConfig.getMessage })

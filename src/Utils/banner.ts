@@ -27,7 +27,7 @@ const gradientLine = (text: string, offset = 0) => {
 }
 
 /** version of Yui-Bails, shown in the banner */
-export const YUI_BAILS_VERSION = '7.0.0-rc13'
+export const YUI_BAILS_VERSION = '1.1.0'
 
 let printed = false
 
