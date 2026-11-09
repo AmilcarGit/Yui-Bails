@@ -4,8 +4,8 @@ import { type AutomationSocket, makeAutomation } from '../../Utils/automation'
 
 const fakeSocket = () => {
 	const handlers: Record<string, (data: any) => void> = {}
-	const readMessages = jest.fn(async (_keys: unknown) => undefined)
-	const sendPresenceUpdate = jest.fn(async (_type: unknown) => undefined)
+	const readMessages = jest.fn<AutomationSocket['readMessages']>(async () => undefined)
+	const sendPresenceUpdate = jest.fn<AutomationSocket['sendPresenceUpdate']>(async () => undefined)
 	const sock = {
 		ev: { on: (event: string, handler: (data: any) => void) => void (handlers[event] = handler) },
 		readMessages,
