@@ -31,40 +31,67 @@ export const YUI_BAILS_VERSION = '7.0.0-rc13'
 
 let printed = false
 
+// "YUI" in block letters, 21 columns wide
+const LOGO = [
+	'██╗   ██╗██╗   ██╗██╗',
+	'╚██╗ ██╔╝██║   ██║██║',
+	' ╚████╔╝ ██║   ██║██║',
+	'  ╚██╔╝  ██║   ██║██║',
+	'   ██║   ╚██████╔╝██║',
+	'   ╚═╝    ╚═════╝ ╚═╝'
+]
+
+const LOGO_WIDTH = Math.max(...LOGO.map(l => l.length))
+const WIDTH = 46
+
+/** the banner as text (colors included). Separate from `printBanner` so it can be tested. */
+export const renderBanner = (version: string = YUI_BAILS_VERSION) => {
+	const line = '─'.repeat(WIDTH)
+	const edge = (ch: string) => paint(ch, 105)
+
+	// `visible` is the length without colors: it is what decides the centering
+	const center = (text: string, visible: number) => {
+		const left = Math.max(0, Math.floor((WIDTH - visible) / 2))
+		return ' '.repeat(left) + text + ' '.repeat(Math.max(0, WIDTH - visible - left))
+	}
+
+	const row = (text = '', visible = 0) => `${edge('│')}${center(text, visible)}${edge('│')}`
+
+	const sparkle = (n: number) => paint('✦', GRADIENT[n % GRADIENT.length] ?? 201)
+	const features = ['botones, carruseles y listas nativas', 'cola anti-ban · multi-sesión', 'sesión a prueba de cortes']
+	const widest = Math.max(...features.map(f => f.length))
+	const credit = 'creado por AmilcarGit'
+	const repo = 'github.com/AmilcarGit/Yui-Bails'
+
+	return [
+		'',
+		`${edge('╭')}${gradientLine(line)}${edge('╮')}`,
+		row(),
+		...LOGO.map((l, n) => row(BOLD + gradientLine(l.padEnd(LOGO_WIDTH), Math.min(n, 3)), LOGO_WIDTH)),
+		row(),
+		row(`${sparkle(1)} ${gradientLine('B A I L S', 2)} ${sparkle(8)}`, 13),
+		row(paint(`v${version}`, 250, true), version.length + 1),
+		row(),
+		// the list is centered as a block so the bullets line up
+		...features.map(f => {
+			const margin = Math.floor((WIDTH - (widest + 2)) / 2)
+			return `${edge('│')}${' '.repeat(margin)}${paint('◆', 105)} ${paint(f, 250)}${' '.repeat(WIDTH - margin - f.length - 2)}${edge('│')}`
+		}),
+		row(),
+		row(`${DIM}${credit}${RESET}`, credit.length),
+		row(paint(repo, 69), repo.length),
+		`${edge('╰')}${gradientLine(line, 3)}${edge('╯')}`,
+		''
+	].join('\n')
+}
+
 export const printBanner = (version: string = YUI_BAILS_VERSION) => {
 	if (printed || process.env.YUI_BAILS_NO_BANNER) {
 		return
 	}
 
 	printed = true
-
-	const width = 46
-	const line = '─'.repeat(width)
-	const pad = (text: string, visibleLength = text.length) => {
-		const left = Math.floor((width - visibleLength) / 2)
-		return ' '.repeat(Math.max(0, left)) + text + ' '.repeat(Math.max(0, width - visibleLength - left))
-	}
-
-	const title = 'Y U I  -  B A I L S'
-	const subtitle = '— b o t s   d e   W h a t s A p p —'
-	const items = ['◆ modo turbo · baja latencia', '◆ botones nativos · listas · flows', '◆ consola limpia · cero ruido']
-
-	const edge = (ch: string) => paint(ch, 105)
-	const out = [
-		'',
-		`${edge('╭')}${gradientLine(line)}${edge('╮')}`,
-		`${edge('│')}${' '.repeat(width)}${edge('│')}`,
-		`${edge('│')}${pad(`${BOLD}${gradientLine(title)}`, title.length)}${edge('│')}`,
-		`${edge('│')}${pad(gradientLine(subtitle, 3), subtitle.length)}${edge('│')}`,
-		`${edge('│')}${' '.repeat(width)}${edge('│')}`,
-		...items.map(item => `${edge('│')}${pad(paint(item, 250), item.length)}${edge('│')}`),
-		`${edge('│')}${' '.repeat(width)}${edge('│')}`,
-		`${edge('│')}${pad(`${DIM}v${version}${RESET}`, version.length + 1)}${edge('│')}`,
-		`${edge('╰')}${gradientLine(line, 3)}${edge('╯')}`,
-		''
-	]
-
-	console.log(out.join('\n'))
+	console.log(renderBanner(version))
 }
 
 let versionNoticePrinted = false
