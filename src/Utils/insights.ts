@@ -170,7 +170,7 @@ export const makeInsights = (sock: InsightSocket, options: InsightOptions = {}) 
 
 	sock.ev.on('messages.update', (updates: WAMessageUpdate[]) => {
 		for (const { key, update } of updates) {
-			const status = update.status == null ? undefined : FROM_STATUS[update.status]
+			const status = typeof update.status === 'number' ? FROM_STATUS[update.status] : undefined
 			if (key.fromMe && status) announce(key, status)
 		}
 	})

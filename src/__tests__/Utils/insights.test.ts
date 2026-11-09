@@ -69,6 +69,7 @@ describe('message.status', () => {
 		)
 		return seen
 	}
+
 	const update = (status: number, id = 'M1', fromMe = true) => [
 		{ key: { remoteJid: '1@s.whatsapp.net', id, fromMe }, update: { status } }
 	]
