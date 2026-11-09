@@ -3,6 +3,7 @@ import type { UserFacingSocketConfig } from '../Types'
 import { printBanner } from '../Utils/banner'
 import { installConsoleFilter } from '../Utils/console-filter'
 import { makeGroupMetadataCache } from '../Utils/group-cache'
+import { makeGroupFetcher } from '../Utils/group-fetch'
 import { type GroupToolsSocket, makeGroupTools } from '../Utils/group-tools'
 import { type HelperSocket, makeHelpers } from '../Utils/helpers'
 import { makeInsights } from '../Utils/insights'
@@ -73,6 +74,11 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 			groupCache.delete(id)
 		})
 	}
+
+	// `sock.groupMetadata`: cache first, one request per group at a time, waits when WhatsApp rate-limits
+	const rawGroupMetadata = sock.groupMetadata
+	const groupMetadata = makeGroupFetcher(rawGroupMetadata, groupCache)
+	sock.groupMetadata = groupMetadata
 
 	const loose = sock as unknown as HelperSocket & QueueSocket
 
