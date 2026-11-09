@@ -86,7 +86,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 
 	// optional: mark messages as read and set the presence by itself
 	makeAutomation(sock as unknown as AutomationSocket, newConfig, { logger: newConfig.logger })
-	if (newConfig.prettyLogs) attachPrettyEvents(sock)
+	if (newConfig.prettyLogs) attachPrettyEvents(sock as unknown as Parameters<typeof attachPrettyEvents>[0])
 
 	// `Object.assign` (not a spread): the socket has getters such as `user` that must stay live
 	const helpers = makeHelpers(loose, { logger: newConfig.logger, getMessage: newConfig.getMessage })
