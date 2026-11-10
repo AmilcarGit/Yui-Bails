@@ -92,7 +92,7 @@ describe('requestPairingCodeSafe', () => {
 	})
 
 	it('does not retry a closed connection or keep retrying forever', async () => {
-		const closed = jest.fn(async (_number: string) =>
+		const closed = jest.fn<(number: string) => Promise<string>>(async () =>
 			Promise.reject(new Boom('Connection Closed', { statusCode: 428 }))
 		)
 		await expect(requestPairingCodeSafe({ requestPairingCode: closed }, '51912345678')).rejects.toThrow(
