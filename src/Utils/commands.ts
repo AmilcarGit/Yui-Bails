@@ -206,7 +206,8 @@ export const makeCommands = (sock: CommandsSocket, options: CommandsOptions = {}
 
 			if (!isOwner(sender) && isSpamming(user)) {
 				// one notice per window, not one per message
-				if (now() - (warned.get(user) ?? 0) > (spamRule ? spamRule.windowMs : 0)) {
+				const lastWarning = warned.get(user)
+				if (lastWarning === undefined || now() - lastWarning > (spamRule ? spamRule.windowMs : 0)) {
 					warned.set(user, now())
 					await say(chat, msg, messages.spam)
 				}

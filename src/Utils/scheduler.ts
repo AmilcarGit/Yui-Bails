@@ -63,7 +63,7 @@ const FIELD_RANGES: Array<[number, number]> = [
 	[0, 23], // hour
 	[1, 31], // day of the month
 	[1, 12], // month
-	[0, 6] // day of the week (0 = Sunday)
+	[0, 7] // day of the week (0 and 7 = Sunday)
 ]
 
 const parseField = (field: string, [min, max]: [number, number], isWeekday: boolean): Set<number> => {
@@ -82,18 +82,15 @@ const parseField = (field: string, [min, max]: [number, number], isWeekday: bool
 			to = endText === undefined ? (stepText === undefined ? from : max) : Number(endText)
 		}
 
-		if (isWeekday) {
-			// 7 is also Sunday
-			if (from === 7) from = 0
-			if (to === 7 && from !== 0) to = 6
-		}
-
 		if (!Number.isInteger(from) || !Number.isInteger(to) || from < min || to > max || from > to) {
 			throw new Boom(`Invalid cron field "${field}"`, { statusCode: 400 })
 		}
 
 		for (let value = from; value <= to; value += step) values.add(value)
 	}
+
+	// 7 is also Sunday
+	if (isWeekday && values.delete(7)) values.add(0)
 
 	return values
 }
@@ -143,15 +140,19 @@ export const nextCronTime = (expression: string, from: number): number => {
 
 /** rejects what cannot be saved in a JSON file (buffers, streams, functions) */
 const assertSerializable = (content: unknown) => {
-	JSON.stringify(content, (_key, value) => {
+	const walk = (value: unknown, depth: number) => {
 		if (typeof value === 'function' || Buffer.isBuffer(value) || value instanceof Uint8Array) {
 			throw new Boom('Scheduled content must be plain JSON: use { url } for media, not buffers or streams', {
 				statusCode: 400
 			})
 		}
 
-		return value
-	})
+		if (value && typeof value === 'object' && depth < 20) {
+			for (const child of Object.values(value)) walk(child, depth + 1)
+		}
+	}
+
+	walk(content, 0)
 }
 
 /**

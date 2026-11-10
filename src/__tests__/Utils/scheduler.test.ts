@@ -110,7 +110,7 @@ describe('makeScheduler', () => {
 
 	it('schedules by cron and by date, soonest first', () => {
 		const { scheduler, time } = setup()
-		const late = scheduler.at(time() + 5000, 'a@s.whatsapp.net', { text: 'late' })
+		const late = scheduler.at(time() + 3_600_000, 'a@s.whatsapp.net', { text: 'late' })
 		const cron = scheduler.cron('30 8 * * *', 'a@s.whatsapp.net', { text: 'cron' })
 
 		const [first, second] = scheduler.list()

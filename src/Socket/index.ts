@@ -127,7 +127,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	// commands with prefix, roles and cooldown; messages for later
 	const commands = makeCommands(
 		{
-			ev: sock.ev,
+			ev: sock.ev as unknown as CommandsSocket['ev'],
 			getSender: msg => helpers.getSender(msg),
 			sendMessage: (...args) => (sock.sendMessage as CommandsSocket['sendMessage'])(...args),
 			isAdmin: (jid, who) => groups.isAdmin(jid, who)
