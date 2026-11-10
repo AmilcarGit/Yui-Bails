@@ -7,6 +7,7 @@ import { makeGroupMetadataCache } from '../Utils/group-cache'
 import { makeGroupFetcher } from '../Utils/group-fetch'
 import { type GroupToolsSocket, makeGroupTools } from '../Utils/group-tools'
 import { type HelperSocket, makeHelpers } from '../Utils/helpers'
+import { type InteractiveSocket, makeInteractive } from '../Utils/interactive'
 import { makeInsights } from '../Utils/insights'
 import { withAutoMentions } from '../Utils/mentions'
 import { makeMessageStore } from '../Utils/message-store'
@@ -108,6 +109,19 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		getSender: helpers.getSender
 	})
 
+	// confirmations, pages, nested menus, guarded and repeatable buttons
+	const interactive = makeInteractive(
+		{
+			sendMessage: (...args) => (sock.sendMessage as InteractiveSocket['sendMessage'])(...args),
+			sendButtons: (...args) => helpers.sendButtons(...args),
+			disableButtons: msg => helpers.disableButtons(msg),
+			getSender: msg => helpers.getSender(msg),
+			onReply: (matcher, run) => replies.onReply(matcher, run),
+			isAdmin: (jid, who) => groups.isAdmin(jid, who)
+		},
+		{ logger: newConfig.logger }
+	)
+
 	// every send: `@number` in the text becomes a mention, and the result is counted
 	const decorate = (send: typeof sock.sendMessage): typeof sock.sendMessage =>
 		insights.wrapSend((jid, content, options) =>
@@ -122,6 +136,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		getMessageStatus: insights.getMessageStatus,
 		health: insights.health,
 		...groups,
+		...interactive,
 		sendMessage: decorate(sendQueue.sendMessage as typeof sock.sendMessage),
 		sendMessageNow: decorate(sendQueue.sendMessageNow as typeof sock.sendMessage),
 		messageStore: store,
