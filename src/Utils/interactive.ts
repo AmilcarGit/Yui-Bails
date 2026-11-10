@@ -1,6 +1,6 @@
 import { Boom } from '@hapi/boom'
-import type { MiscMessageGenerationOptions, WAMessage } from '../Types'
-import type { ButtonSpec, SenderInfo, SendButtonsOptions } from './helpers'
+import type { ButtonSpec, MiscMessageGenerationOptions, WAMessage } from '../Types'
+import type { SenderInfo, SendButtonsOptions } from './helpers'
 import type { ButtonReply } from './replies'
 
 type Content = Record<string, unknown>
