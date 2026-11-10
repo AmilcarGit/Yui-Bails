@@ -1,7 +1,7 @@
 {
   "name": "@yui-bails/yui-bails",
   "type": "module",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Yui-Bails: librería profesional para bots de WhatsApp (helpers, cola anti-ban, multi-sesión, botones y más)",
   "keywords": [
     "whatsapp",

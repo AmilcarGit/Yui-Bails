@@ -316,6 +316,30 @@ Cada toque envía otro resultado (si le das una función, se ejecuta cada vez) y
 
 > Los botones expiran a los 10 minutos sin uso (`ttlMs`) y se pierden si el bot se reinicia: quien toque uno viejo recibe "⌛ Este botón ya venció".
 
+## 🧪 Botones experimentales
+
+Botones nativos que existen en el protocolo de WhatsApp pero **no están confirmados en teléfonos reales**: WhatsApp ignora los que no soporta y el mensaje puede llegar sin ellos. Salen de documentación pública y de otras librerías (no los hemos visto funcionar). Pruébalos de uno en uno y quédate con los que se vean.
+
+```js
+import { experimentalButtons } from 'yui-bails'
+
+await sock.sendButtons(msg.key.remoteJid, {
+  text: 'Comparte tu ubicación',
+  buttons: [experimentalButtons.requestLocation('📍 Enviar ubicación')]
+}, { quoted: msg })
+```
+
+| Helper | Botón nativo | Qué debería hacer |
+|---|---|---|
+| `experimentalButtons.requestLocation(texto)` | `send_location` | Abre la pantalla para compartir ubicación |
+| `experimentalButtons.reminder(texto)` | `cta_reminder` | Pide a WhatsApp que te lo recuerde |
+| `experimentalButtons.cancelReminder(texto)` | `cta_cancel_reminder` | Cancela ese recordatorio |
+| `experimentalButtons.address(texto)` | `address_message` | Formulario de dirección |
+| `experimentalButtons.webview(titulo, url)` | `open_webview` | Abre una web dentro de WhatsApp |
+| `experimentalButtons.custom(nombre, params)` | el que quieras | Cualquier botón nativo por nombre |
+
+Los botones de catálogo, pago y flows (`cta_catalog`, `review_and_pay`, `mpm`, `flow`…) dependen de cuentas de negocio, por eso no tienen helper. Con `custom` puedes probarlos tú.
+
 ## 📊 Datos reales del bot
 
 Nada estimado: son contadores y mediciones de lo que hace tu bot.
