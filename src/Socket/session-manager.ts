@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { DisconnectReason, type UserFacingSocketConfig } from '../Types'
+import { normalizePhoneNumber, requestPairingCodeSafe } from '../Utils/pairing'
 import { useMultiFileAuthState } from '../Utils/use-multi-file-auth-state'
 import makeWASocket from './index'
 
@@ -13,6 +14,10 @@ export type SessionManagerOptions = {
 	authDir: string
 	/** socket config shared by every session, or a function that builds it per session */
 	config?: Partial<UserFacingSocketConfig> | ((sessionId: string) => Partial<UserFacingSocketConfig>)
+	/** use this folder as the login of each session instead of `<authDir>/<id>` (used by `connectBot`) */
+	authPath?: (sessionId: string) => string
+	/** pairing code retries (timeouts and "rate-overlimit"). Default 2 */
+	pairingRetries?: number
 	/** called every time a socket is created (also on reconnects): attach your event handlers here */
 	setup?: (sock: YuiSocket, sessionId: string) => void | Promise<void>
 	/** reconnect by itself when the connection drops (not after a logout). Default true */
@@ -83,7 +88,7 @@ export const makeSessionManager = (options: SessionManagerOptions) => {
 	const emit = <K extends keyof SessionManagerEvents>(event: K, data: SessionManagerEvents[K]) =>
 		emitter.emit(event, data)
 
-	const authPath = (id: string) => path.join(options.authDir, id)
+	const authPath = (id: string) => (options.authPath ? options.authPath(id) : path.join(options.authDir, id))
 
 	const assertId = (id: string) => {
 		if (typeof id !== 'string' || !VALID_ID.test(id) || id.includes('..')) {
@@ -118,7 +123,7 @@ export const makeSessionManager = (options: SessionManagerOptions) => {
 						if (!pairingAsked) {
 							pairingAsked = true
 							try {
-								const code = await sock.requestPairingCode(number.replace(/\D/g, ''))
+								const code = await requestPairingCodeSafe(sock, number, { retries: options.pairingRetries })
 								emit('session.pairing-code', { id: session.id, code })
 							} catch (error) {
 								emit('session.error', { id: session.id, error })
@@ -173,6 +178,8 @@ export const makeSessionManager = (options: SessionManagerOptions) => {
 		/** Starts (or returns the already running) session. */
 		start: async (id: string, startOptions: StartSessionOptions = {}): Promise<YuiSocket | undefined> => {
 			assertId(id)
+			if (startOptions.pairingNumber)
+				startOptions = { ...startOptions, pairingNumber: normalizePhoneNumber(startOptions.pairingNumber) }
 
 			const existing = sessions.get(id)
 			if (existing && !existing.stopped) return existing.sock

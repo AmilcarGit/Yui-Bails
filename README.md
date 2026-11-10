@@ -478,6 +478,44 @@ await sessions.stopAll()
 
 Los ids solo admiten letras, números, `_`, `-` y `.` (son nombres de carpeta).
 
+## 🔗 Vincular fácil: `connectBot`
+
+Una sola llamada se encarga de la carpeta de sesión, del código de vinculación (o QR), de reconectar y de explicar los errores en español:
+
+```js
+import { connectBot } from 'yui-bails'
+
+const bot = await connectBot({
+  authDir: './sesion',        // carpeta donde se guarda el login
+  number: '51912345678',      // número del bot, con código de país
+  config: { prettyLogs: true, sendQueue: true },
+  setup: sock => {            // se llama en cada conexión, también al reconectar
+    sock.ev.on('messages.upsert', async ({ messages }) => { /* tus comandos */ })
+  }
+})
+
+const sock = await bot.ready  // se resuelve cuando el bot está conectado
+```
+
+La primera vez imprime algo así:
+
+```
+🔗 Código de vinculación: ABCD-1234
+   En el teléfono: WhatsApp > Dispositivos vinculados > Vincular un dispositivo > Vincular con el número de teléfono
+```
+
+- **Número:** acepta `+51 912 345 678`, `(51) 912-345-678` o `0051912345678` y lo deja como `51912345678`. Si está mal (empieza con 0, es muy corto, tiene letras…) falla antes de conectar y dice qué corregir.
+- **QR en vez de código:** no pases `number` y da un `onQR: qr => ...` para dibujarlo con la librería de QR que prefieras.
+- **Código personalizado:** `onCode: ({ code, formatted }) => ...` en vez de imprimirlo.
+- **Errores claros:** `onClose` y `onError` traen un `message` en español (por ejemplo "WhatsApp recibió demasiados intentos seguidos y se tomó un descanso, espera 10-15 minutos").
+- **Reintentos:** si WhatsApp tarda en responder o limita el código (`rate-overlimit`), espera y lo pide otra vez. Si la conexión se cae, al reconectar se genera un código nuevo.
+- `authDir` no puede ser `.`, `/` ni tu carpeta personal: al cerrar sesión se borra esa carpeta.
+- `bot.stop()` cierra la conexión conservando el login; `bot.logout()` cierra sesión y borra el login.
+
+También puedes usar por separado `normalizePhoneNumber`, `formatPairingCode`, `explainLinkError` y `requestPairingCodeSafe`.
+
+> La notificación "¿Vincular dispositivo?" en el teléfono ya se pide siempre. Si no llega: revisa que el número sea el de ese WhatsApp, que el teléfono tenga datos y no esté en no molestar, y que no hayas pedido muchos códigos seguidos.
+
 ## 🖥️ Logs legibles y lectura automática
 
 ```js
