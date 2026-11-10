@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { DisconnectReason, type UserFacingSocketConfig } from '../Types'
+import { makeCacheableSignalKeyStore } from '../Utils/auth-utils'
 import { normalizePhoneNumber, requestPairingCodeSafe } from '../Utils/pairing'
 import { useMultiFileAuthState } from '../Utils/use-multi-file-auth-state'
 import makeWASocket from './index'
@@ -105,7 +106,9 @@ export const makeSessionManager = (options: SessionManagerOptions) => {
 			const { state, saveCreds } = await useMultiFileAuthState(authPath(session.id))
 			const base = typeof options.config === 'function' ? options.config(session.id) : options.config || {}
 
-			const sock = makeSocket({ ...base, ...session.options.config, auth: state } as UserFacingSocketConfig)
+			// the signal keys are cached in memory: far fewer disk reads on every message
+			const auth = { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, base.logger) }
+			const sock = makeSocket({ ...base, ...session.options.config, auth } as UserFacingSocketConfig)
 			session.sock = sock
 
 			let pairingAsked = false
