@@ -255,6 +255,67 @@ await sock.sendMessage(jid, { text: 'Hola, soy un bot', ai: true })
 
 Marca el mensaje como enviado por un bot de negocio para que WhatsApp muestre el icono de IA. Que se muestre depende de la versión de WhatsApp de quien lo recibe.
 
+## 🧠 Botones inteligentes
+
+Cinco helpers hechos sobre botones de respuesta rápida y desplegables, que ya sabemos que funcionan. Todos reciben el mensaje del comando (`msg`) y, por defecto, **solo la persona que lo escribió puede tocar los botones**.
+
+### Confirmar (Sí / No)
+
+```js
+const ok = await sock.confirm(msg, '¿Seguro que quieres expulsar a este usuario?')
+if (ok) await sock.groupParticipantsUpdate(msg.key.remoteJid, [usuario], 'remove')
+```
+
+Devuelve `true` si tocan "Sí" y `false` si tocan "No" o se acaba el tiempo (30 s por defecto). Opciones: `yes`, `no`, `footer`, `timeoutMs`.
+
+### Paginador
+
+```js
+await sock.paginate(msg, resultados, { perPage: 5, title: '🔎 Resultados', format: (item, i) => `${i + 1}. ${item.nombre}` })
+```
+
+Cada página es un mensaje nuevo con botones **◀ Anterior / Siguiente ▶**, y a la página anterior se le quitan los botones. Con una sola página envía solo texto.
+
+### Menú con submenús
+
+```js
+await sock.menu(msg, {
+  title: 'Menú',
+  text: 'Elige una categoría:',
+  items: [
+    { title: '🎮 Juegos', items: [
+      { title: '🎲 Dado', run: ({ msg }) => sock.reply(msg, `Salió ${1 + Math.floor(Math.random() * 6)}`) },
+      { title: '🪙 Moneda', text: 'Cara o cruz' }
+    ] },
+    { title: 'ℹ️ Info', text: 'Soy un bot' }
+  ]
+})
+```
+
+Cada nivel es un desplegable. Las filas con `items` abren otro nivel (con una fila **⬅ Volver**); las demás envían `text` y/o ejecutan `run`. WhatsApp suele limitar las listas a unas 10 filas: si tienes más, divídelas en submenús o usa `paginate`.
+
+### Botones con permisos
+
+```js
+await sock.sendGuardedButtons(
+  msg,
+  { text: 'Panel de admin', buttons: [{ id: 'abrir', text: 'Abrir' }], who: 'admins', once: false },
+  ({ msg, id, sender }) => sock.reply(msg, `Abriste ${id}`)
+)
+```
+
+`who` acepta `'sender'` (por defecto), `'admins'` (admins del grupo; en privado, quien escribió), `'anyone'` o tu propia función `(sender, msg) => boolean`. A los demás se les responde "🚫 Este botón no es para ti" (cámbialo con `denied`, o `false` para ignorarlos). Con `once: true` solo cuenta el primer toque. Los botones de URL, llamada y copiar actúan por sí solos y no se pueden restringir.
+
+### Botón para repetir
+
+```js
+await sock.sendRepeatable(msg, () => frases[Math.floor(Math.random() * frases.length)], { buttonText: '🔁 Otra frase' })
+```
+
+Cada toque envía otro resultado (si le das una función, se ejecuta cada vez) y quita el botón del mensaje anterior. También acepta contenido con imagen: `{ image: { url }, caption }`. Por defecto lo puede tocar cualquiera (`who: 'anyone'`) hasta `maxRepeats` (10) veces.
+
+> Los botones expiran a los 10 minutos sin uso (`ttlMs`) y se pierden si el bot se reinicia: quien toque uno viejo recibe "⌛ Este botón ya venció".
+
 ## 📊 Datos reales del bot
 
 Nada estimado: son contadores y mediciones de lo que hace tu bot.
