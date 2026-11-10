@@ -28,7 +28,10 @@ const setup = (admins: string[] = []) => {
 	const interactive = makeInteractive({
 		sendMessage: send,
 		sendButtons: (jid, options) => send(jid, options),
-		disableButtons: async msg => void disabled.push(msg) || true,
+		disableButtons: async msg => {
+			disabled.push(msg)
+			return true
+		},
 		getSender: async msg => getSenderIds(msg),
 		onReply: (matcher, run) => replies.onReply(matcher, run),
 		isAdmin: async (_jid, who) => admins.includes(who.number || '')
