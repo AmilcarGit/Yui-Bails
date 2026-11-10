@@ -48,6 +48,8 @@ Una bails profesional para tu bot de WhatsApp 👑
 | 🧰 | **Helpers integrados** | `getSender`, `reply`, `react`, `sendButtons`, `sendList`, `sendPoll`, `downloadMedia` y conteo de votos de encuestas ([detalles](#-helpers-integrados)) |
 | 🛡️ | **Cola anti-ban** | Pausas aleatorias, límite por chat y "escribiendo…" automático ([detalles](#️-cola-anti-ban-sendqueue)) |
 | 📱 | **Multi-sesión** | Varios números de WhatsApp en un solo proceso con `makeSessionManager` ([detalles](#-multi-sesión-makesessionmanager)) |
+| 🧭 | **Comandos con roles** | Prefijos, alias, dueño/admin, cooldown y anti-spam con `sock.commands` ([detalles](#-comandos-con-roles-y-cooldown)) |
+| ⏰ | **Mensajes programados** | Una vez, cada cierto tiempo o con cron; se guardan en disco ([detalles](#-mensajes-programados-sockschedule)) |
 
 ## 🔘 Botones nativos incluidos
 
@@ -431,6 +433,15 @@ sock.queue.clear()     // descarta los que faltan
 sock.sendMessageNow(jid, { text: 'urgente' }) // salta la cola
 ```
 
+### Prioridades
+
+Los mensajes esperan en orden de llegada, salvo que les pongas `priority`: `'urgent'`, `'high'`, `'normal'` (por defecto) o `'low'`. Uno de mayor prioridad se adelanta a los que están esperando; entre iguales se mantiene el orden. Los `urgent` además salen sin "escribiendo…". `priority` solo lo usa la cola: nunca se envía a WhatsApp.
+
+```js
+await sock.sendMessage(jid, { text: 'Resumen diario' }, { priority: 'low' })
+await sock.sendMessage(jid, { text: '⚠️ El bot se reinicia' }, { priority: 'urgent' })
+```
+
 | Opción | Por defecto | Qué hace |
 |---|---|---|
 | `minDelayMs` / `maxDelayMs` | 800 / 2500 | Pausa aleatoria entre dos envíos |
@@ -441,6 +452,62 @@ sock.sendMessageNow(jid, { text: 'urgente' }) // salta la cola
 | `maxQueueSize` | 500 | Con la cola llena, `sendMessage` falla con 429 |
 
 Reduce el riesgo de bloqueo, pero no lo elimina: no escribas a números que no te conocen ni hagas spam.
+
+## 🧭 Comandos con roles y cooldown
+
+`sock.commands` es un enrutador de comandos pequeño: prefijos, alias, roles, cooldown por usuario y un anti-spam básico. No reemplaza tu propio manejador; úsalo si te sirve.
+
+```js
+const sock = makeWASocket({
+  auth: state,
+  commands: { prefix: ['.', '!'], owners: ['5731XXXXXXXX'] } // opciones opcionales
+})
+
+sock.commands.add({
+  name: 'ping',
+  aliases: ['p'],
+  description: 'Prueba de vida',
+  cooldownMs: 5000, // espera por usuario
+  run: ctx => ctx.reply('pong 🏓')
+})
+
+sock.commands.add({ name: 'kick', role: 'admin', groupOnly: true, run: async ctx => { /* ... */ } })
+sock.commands.add({ name: 'apagar', role: 'owner', run: () => process.exit(0) })
+
+sock.commands.listen() // escucha mensajes nuevos (o llama sock.commands.handle(msg) tú mismo)
+```
+
+| Opción | Por defecto | Qué hace |
+|---|---|---|
+| `prefix` | `['.', '!', '/', '#']` | Uno o varios prefijos. `false` = comandos sin prefijo |
+| `owners` | `[]` | Números (o ids/jids) con permiso de dueño |
+| `ownerIncludesBot` | `true` | El número vinculado también cuenta como dueño |
+| `spam` | 6 por 10 s | Pasado el límite se ignoran los comandos (avisa una vez). `false` lo apaga |
+| `messages` | en español | Textos de "solo dueño", "solo admins", cooldown, etc. |
+| `onError` | avisa al chat | Qué hacer si un comando lanza un error |
+
+Cada comando recibe `ctx` con `command`, `prefix`, `text`, `args`, `sender` (con LID y número), `chat`, `isGroup`, `msg` y `reply()`. Los dueños no esperan cooldown. `sock.commands.list()` devuelve los comandos registrados para armar tu menú, y `sock.cooldown(usuario, accion, ms)` te deja usar el mismo cooldown en tus propias funciones (devuelve los ms que faltan, `0` si puede seguir).
+
+## ⏰ Mensajes programados (`sock.schedule`)
+
+Envía mensajes más tarde, cada cierto tiempo o con una expresión cron. Solo salen mientras la cuenta está conectada; si el bot estuvo apagado, un mensaje de una sola vez que se atrasó **hasta 5 min** se envía igual, y uno más tardío se descarta.
+
+```js
+const sock = makeWASocket({ auth: state, schedulerFile: './programados.json' }) // sin archivo: solo en memoria
+
+sock.schedule.after('10m', jid, { text: 'Han pasado 10 minutos' })
+sock.schedule.at('2026-12-31T23:59:00', jid, { text: '¡Feliz año! 🎉' })
+sock.schedule.every('2h', jid, { text: 'Recordatorio' }, { times: 5 })
+const id = sock.schedule.cron('0 9 * * 1-5', jid, { text: 'Buenos días' }) // lun-vie 9:00, hora local
+
+sock.schedule.list()    // pendientes, el más próximo primero
+sock.schedule.cancel(id)
+```
+
+- Intervalos: `'30s'`, `'15m'`, `'2h'`, `'1d'` o milisegundos.
+- Cron de 5 campos (`minuto hora día mes día-de-semana`) con `*`, listas, rangos y pasos (`*/10`).
+- El contenido debe ser JSON simple: para imágenes usa `{ image: { url } }`, no buffers.
+- Si un envío falla se reintenta a los 30 s (3 intentos) y luego pasa a la siguiente vuelta.
 
 ## 📱 Multi-sesión (`makeSessionManager`)
 
@@ -547,6 +614,16 @@ const sock = makeWASocket({ auth: state, logger: makePrettyLogger({ level: 'info
 ```
 
 Traduce los avisos más comunes (por ejemplo `No session found to decrypt message` pasa a "No pude leer un mensaje de 5731…: falta su clave de cifrado. Pídele que lo envíe otra vez.") y esconde el ruido interno que no necesitas.
+
+## 🖼️ Miniaturas y fotos de perfil
+
+Yui-Bails usa la primera librería de imágenes que encuentre: **sharp**, luego **@napi-rs/image** y por último **jimp**. En Termux, donde `sharp` a veces no instala, prueba con:
+
+```bash
+npm install @napi-rs/image
+```
+
+Las miniaturas de video usan `ffmpeg` lanzado sin shell (`spawn`), así que rutas con espacios o símbolos no rompen nada.
 
 ## 🎛️ Variables de entorno
 

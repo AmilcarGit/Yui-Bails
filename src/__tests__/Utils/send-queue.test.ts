@@ -103,4 +103,38 @@ describe('makeSendQueue', () => {
 		expect(sock.sendMessage).toHaveBeenCalledTimes(1)
 		expect(sleeps).toEqual([])
 	})
+	describe('priority', () => {
+		const sentTexts = (sock: { sendMessage: jest.Mock<any> }) =>
+			sock.sendMessage.mock.calls.map(call => (call[1] as { text: string }).text)
+
+		it('urgent and high messages jump ahead of waiting ones; equal priority keeps its order', async () => {
+			const { queue, sock } = setup({ typing: false })
+			const all = [
+				queue.sendMessage('a@s.whatsapp.net', { text: 'first' }),
+				queue.sendMessage('a@s.whatsapp.net', { text: 'low' }, { priority: 'low' }),
+				queue.sendMessage('a@s.whatsapp.net', { text: 'normal 1' }),
+				queue.sendMessage('a@s.whatsapp.net', { text: 'normal 2' }),
+				queue.sendMessage('a@s.whatsapp.net', { text: 'high' }, { priority: 'high' }),
+				queue.sendMessage('a@s.whatsapp.net', { text: 'urgent' }, { priority: 'urgent' })
+			]
+			await Promise.all(all)
+
+			expect(sentTexts(sock)).toEqual(['first', 'urgent', 'high', 'normal 1', 'normal 2', 'low'])
+		})
+
+		it('never sends `priority` to WhatsApp, but keeps the other options', async () => {
+			const { queue, sock } = setup({ typing: false })
+			await queue.sendMessage('a@s.whatsapp.net', { text: 'x' }, { priority: 'high', ephemeralExpiration: 60 })
+
+			const options = sock.sendMessage.mock.calls[0]![2] as Record<string, unknown>
+			expect(options).toEqual({ ephemeralExpiration: 60 })
+			expect('priority' in options).toBe(false)
+		})
+
+		it('urgent messages skip the typing indicator', async () => {
+			const { queue, sock } = setup()
+			await queue.sendMessage('a@s.whatsapp.net', { text: 'rápido' }, { priority: 'urgent' })
+			expect(sock.sendPresenceUpdate).not.toHaveBeenCalled()
+		})
+	})
 })

@@ -1,5 +1,5 @@
 import { Boom } from '@hapi/boom'
-import { exec } from 'child_process'
+import { spawn } from 'child_process'
 import * as Crypto from 'crypto'
 import { once } from 'events'
 import { createReadStream, createWriteStream, promises as fs, WriteStream } from 'fs'
@@ -31,19 +31,53 @@ import type { ILogger } from './logger'
 
 const getTmpFilesDirectory = () => tmpdir()
 
-const getImageProcessingLibrary = async () => {
-	//@ts-ignore
-	const [jimp, sharp] = await Promise.all([import('jimp').catch(() => {}), import('sharp').catch(() => {})])
+const NAPI_IMAGE_MODULE = '@napi-rs/image'
 
-	if (sharp) {
-		return { sharp }
-	}
+type ImageLibLoaders = {
+	sharp: () => Promise<any>
+	napi: () => Promise<any>
+	jimp: () => Promise<any>
+}
 
-	if (jimp) {
-		return { jimp }
-	}
+const defaultImageLoaders: ImageLibLoaders = {
+	// @ts-ignore
+	sharp: () => import('sharp').catch(() => undefined) as Promise<any>,
+	// optional: `npm install @napi-rs/image` (prebuilt binaries, handy where sharp does not install, like Termux)
+	napi: () => import(NAPI_IMAGE_MODULE).catch(() => undefined) as Promise<any>,
+	// @ts-ignore
+	jimp: () => import('jimp').catch(() => undefined) as Promise<any>
+}
 
-	throw new Boom('No image processing library available')
+/** Picks the first image library that is installed: sharp, then @napi-rs/image, then jimp. */
+export const getImageProcessingLibrary = async (loaders: ImageLibLoaders = defaultImageLoaders) => {
+	const sharp = await loaders.sharp()
+	if (sharp) return { sharp }
+
+	const napi = await loaders.napi()
+	if (napi?.Transformer) return { napi }
+
+	const jimp = await loaders.jimp()
+	if (jimp) return { jimp }
+
+	throw new Boom('No image processing library available (install sharp, @napi-rs/image or jimp)')
+}
+
+/** JPEG thumbnail with @napi-rs/image */
+export const napiThumb = async (napi: { Transformer: any }, input: Buffer, width: number) => {
+	const transformer = new napi.Transformer(input)
+	const { width: originalWidth, height: originalHeight } = await transformer.metadata()
+	const buffer: Buffer = await transformer.resize(width).jpeg(50)
+	return { buffer, original: { width: originalWidth, height: originalHeight } }
+}
+
+/** square JPEG (cropped from the top-left corner, like the other libraries) with @napi-rs/image */
+export const napiSquare = async (napi: { Transformer: any }, input: Buffer, width: number, height: number) => {
+	const probe = new napi.Transformer(input)
+	const { width: originalWidth, height: originalHeight } = await probe.metadata()
+	const min = Math.min(originalWidth, originalHeight)
+	const transformer = new napi.Transformer(input)
+	const buffer: Buffer = await transformer.crop(0, 0, min, min).resize(width, height).jpeg(50)
+	return buffer
 }
 
 export const hkdfInfoKey = (type: MediaType) => {
@@ -114,6 +148,14 @@ export async function getMediaKeys(
 	}
 }
 
+/** ffmpeg arguments to grab the first frame. One argument per item: paths are never run through a shell */
+export const buildVideoThumbArgs = (
+	path: string,
+	destPath: string,
+	time: string,
+	size: { width: number; height: number }
+) => ['-ss', time, '-i', path, '-y', '-vf', `scale=${size.width}:-1`, '-vframes', '1', '-f', 'image2', destPath]
+
 /** Extracts video thumb using FFMPEG */
 const extractVideoThumb = async (
 	path: string,
@@ -122,13 +164,11 @@ const extractVideoThumb = async (
 	size: { width: number; height: number }
 ) =>
 	new Promise<void>((resolve, reject) => {
-		const cmd = `ffmpeg -ss ${time} -i ${path} -y -vf scale=${size.width}:-1 -vframes 1 -f image2 ${destPath}`
-		exec(cmd, err => {
-			if (err) {
-				reject(err)
-			} else {
-				resolve()
-			}
+		const child = spawn('ffmpeg', buildVideoThumbArgs(path, destPath, time, size), { stdio: 'ignore' })
+		child.on('error', reject)
+		child.on('close', code => {
+			if (code === 0) resolve()
+			else reject(new Boom(`ffmpeg exited with code ${code}`))
 		})
 	})
 
@@ -152,6 +192,9 @@ export const extractImageThumb = async (bufferOrFilePath: Readable | Buffer | st
 				height: dimensions.height
 			}
 		}
+	} else if ('napi' in lib) {
+		const input = typeof bufferOrFilePath === 'string' ? await fs.readFile(bufferOrFilePath) : bufferOrFilePath
+		return napiThumb(lib.napi, input as Buffer, width)
 	} else if ('jimp' in lib && typeof lib.jimp?.Jimp === 'object') {
 		const jimp = await (lib.jimp.Jimp as any).read(bufferOrFilePath)
 		const dimensions = {
@@ -200,6 +243,8 @@ export const generateProfilePicture = async (
 				quality: 50
 			})
 			.toBuffer()
+	} else if ('napi' in lib) {
+		img = napiSquare(lib.napi, buffer, w, h)
 	} else if ('jimp' in lib && typeof lib.jimp?.Jimp === 'function') {
 		const jimp = await (lib.jimp.Jimp as any).read(buffer)
 		const min = Math.min(jimp.width, jimp.height)

@@ -1,6 +1,7 @@
 import type { Agent } from 'https'
 import type { URL } from 'url'
 import { proto } from '../../WAProto/index.js'
+import type { CommandsOptions } from '../Utils/commands'
 import type { ILogger } from '../Utils/logger'
 import type { SendQueueOptions } from '../Utils/send-queue'
 import type { AuthenticationState, LIDMapping, SignalAuthState, TransactionCapabilityOptions } from './Auth'
@@ -192,6 +193,12 @@ export type SocketConfig = {
 
 	/** presence sent each time the connection opens: `'available'` (online) or `'unavailable'` (offline) */
 	autoPresence?: 'available' | 'unavailable'
+
+	/** options of `sock.commands` (prefixes, owners, anti-spam, messages) */
+	commands?: CommandsOptions
+
+	/** JSON file where `sock.schedule` keeps pending messages so they survive a restart */
+	schedulerFile?: string
 
 	/**
 	 * Prints one readable line per incoming message and per connection change

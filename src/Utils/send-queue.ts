@@ -30,7 +30,12 @@ export type QueueSocket = {
 	sendPresenceUpdate?: (type: 'composing' | 'paused', toJid?: string) => Promise<void>
 }
 
+type Priority = NonNullable<MiscMessageGenerationOptions['priority']>
+
+const PRIORITY: Record<Priority, number> = { urgent: 3, high: 2, normal: 1, low: 0 }
+
 type Job = {
+	rank: number
 	jid: string
 	content: any
 	options?: MiscMessageGenerationOptions
@@ -52,6 +57,14 @@ const DEFAULTS = {
 
 /** actions that are not "writing a message": they skip the typing indicator */
 const NO_TYPING = ['react', 'delete', 'edit', 'disappearingMessagesInChat', 'pin', 'poll', 'forward']
+
+/** `priority` is only for the queue: WhatsApp never sees it */
+const withoutPriority = (options?: MiscMessageGenerationOptions) => {
+	if (!options || !('priority' in options)) return options
+	const rest = { ...options }
+	delete rest.priority
+	return rest
+}
 
 const textOf = (content: any): string => {
 	if (!content || typeof content !== 'object') return ''
@@ -102,7 +115,7 @@ export const makeSendQueue = (sock: QueueSocket, options: SendQueueOptions = {})
 		const text = textOf(job.content)
 		const isChat = !job.jid.endsWith('@broadcast') && !job.jid.endsWith('@newsletter')
 		const skip = Object.keys(job.content || {}).some(field => NO_TYPING.includes(field))
-		if (!cfg.typing || !text || !isChat || skip || !sock.sendPresenceUpdate) return
+		if (!cfg.typing || !text || !isChat || skip || job.rank === PRIORITY.urgent || !sock.sendPresenceUpdate) return
 
 		const duration = Math.min(cfg.typingMaxMs, Math.max(cfg.typingMinMs, text.length * cfg.typingMsPerChar))
 		try {

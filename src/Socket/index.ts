@@ -2,6 +2,7 @@ import { DEFAULT_CONNECTION_CONFIG } from '../Defaults'
 import type { UserFacingSocketConfig } from '../Types'
 import { type AutomationSocket, makeAutomation } from '../Utils/automation'
 import { printBanner } from '../Utils/banner'
+import { type CommandsSocket, makeCommands } from '../Utils/commands'
 import { installConsoleFilter } from '../Utils/console-filter'
 import { makeGroupMetadataCache } from '../Utils/group-cache'
 import { makeGroupFetcher } from '../Utils/group-fetch'
@@ -13,6 +14,7 @@ import { withAutoMentions } from '../Utils/mentions'
 import { makeMessageStore } from '../Utils/message-store'
 import { attachPrettyEvents } from '../Utils/pretty-log'
 import { makeReplyTools, type ReplySocket } from '../Utils/replies'
+import { makeScheduler } from '../Utils/scheduler'
 import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
 import { makeCommunitiesSocket } from './communities'
 
@@ -122,6 +124,28 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		{ logger: newConfig.logger }
 	)
 
+	// commands with prefix, roles and cooldown; messages for later
+	const commands = makeCommands(
+		{
+			ev: sock.ev,
+			getSender: msg => helpers.getSender(msg),
+			sendMessage: (...args) => (sock.sendMessage as CommandsSocket['sendMessage'])(...args),
+			isAdmin: (jid, who) => groups.isAdmin(jid, who)
+		},
+		newConfig.commands
+	)
+
+	const scheduler = makeScheduler((jid, content, options) => sock.sendMessage(jid, content as any, options), {
+		file: newConfig.schedulerFile,
+		logger: newConfig.logger
+	})
+
+	// messages for later only go out while the account is connected
+	sock.ev.on('connection.update', ({ connection }) => {
+		if (connection === 'open') scheduler.start()
+		else if (connection === 'close') scheduler.stop()
+	})
+
 	// every send: `@number` in the text becomes a mention, and the result is counted
 	const decorate = (send: typeof sock.sendMessage): typeof sock.sendMessage =>
 		insights.wrapSend((jid, content, options) =>
@@ -137,6 +161,9 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		health: insights.health,
 		...groups,
 		...interactive,
+		commands,
+		schedule: scheduler,
+		cooldown: commands.cooldowns.use,
 		sendMessage: decorate(sendQueue.sendMessage as typeof sock.sendMessage),
 		sendMessageNow: decorate(sendQueue.sendMessageNow as typeof sock.sendMessage),
 		messageStore: store,

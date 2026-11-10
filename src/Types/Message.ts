@@ -418,6 +418,11 @@ export type MessageRelayOptions = MinimalRelayOptions & {
 }
 
 export type MiscMessageGenerationOptions = MinimalRelayOptions & {
+	/**
+	 * Place in the send queue (only with `sendQueue` on). Higher priorities go first, in order:
+	 * `urgent` (also skips the "typing…" pause), `high`, `normal` (default), `low` (broadcasts).
+	 */
+	priority?: 'urgent' | 'high' | 'normal' | 'low'
 	/** optional, if you want to manually set the timestamp of the message */
 	timestamp?: Date
 	/** the message you want to quote */
