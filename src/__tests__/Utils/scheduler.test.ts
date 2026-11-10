@@ -7,7 +7,7 @@ import { makeScheduler, nextCronTime, parseDuration } from '../../Utils/schedule
 const setup = (options: Parameters<typeof makeScheduler>[1] = {}) => {
 	let time = new Date(2026, 0, 5, 8, 0, 0).getTime() // Monday 5 Jan 2026, 08:00 local
 	let pending: { fn: () => void; ms: number } | undefined
-	const send = jest.fn(async (_jid: string, _content: unknown) => undefined)
+	const send = jest.fn<(jid: string, content: unknown) => Promise<undefined>>(async () => undefined)
 
 	const scheduler = makeScheduler(send, {
 		now: () => time,

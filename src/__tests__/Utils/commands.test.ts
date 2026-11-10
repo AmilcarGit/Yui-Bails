@@ -33,7 +33,7 @@ const setup = (options: CommandsOptions = {}, admins: string[] = []) => {
 describe('makeCommands', () => {
 	it('runs a command with its arguments and ignores the rest', async () => {
 		const { commands } = setup()
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'eco', run })
 
 		await expect(commands.handle(msg('hola'))).resolves.toBe(false)
@@ -53,7 +53,7 @@ describe('makeCommands', () => {
 
 	it('accepts aliases, several prefixes and is case-insensitive', async () => {
 		const { commands } = setup()
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'menu', aliases: ['ayuda'], run })
 
 		await commands.handle(msg('!AYUDA'))
@@ -64,7 +64,7 @@ describe('makeCommands', () => {
 
 	it('works without prefix when asked', async () => {
 		const { commands } = setup({ prefix: false })
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'ping', run })
 
 		await commands.handle(msg('ping'))
@@ -84,7 +84,7 @@ describe('makeCommands', () => {
 
 	it('owner commands: only owners, or the linked number', async () => {
 		const { commands, sent } = setup({ owners: ['999'] })
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'apagar', role: 'owner', run })
 
 		await commands.handle(msg('.apagar', '111'))
@@ -98,7 +98,7 @@ describe('makeCommands', () => {
 
 	it('admin commands: group admins and owners', async () => {
 		const { commands, sent } = setup({ owners: ['999'] }, ['222'])
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'kick', role: 'admin', run })
 
 		await commands.handle(msg('.kick', '111'))
@@ -111,7 +111,7 @@ describe('makeCommands', () => {
 
 	it('group only and private only', async () => {
 		const { commands, sent } = setup()
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'privado', privateOnly: true, run })
 
 		await commands.handle(msg('.privado'))
@@ -121,7 +121,7 @@ describe('makeCommands', () => {
 
 	it('cooldown per user, but not for owners', async () => {
 		const { commands, sent, advance } = setup({ owners: ['999'], spam: false })
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'ping', cooldownMs: 5000, run })
 
 		await commands.handle(msg('.ping', '111'))
@@ -141,7 +141,7 @@ describe('makeCommands', () => {
 
 	it('ignores a user who sends too many commands, warning once', async () => {
 		const { commands, sent } = setup({ spam: { max: 2, windowMs: 10_000 } })
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'ping', run })
 
 		for (let i = 0; i < 6; i++) await commands.handle(msg('.ping'))
@@ -183,7 +183,7 @@ describe('makeCommands', () => {
 
 	it('listen handles live messages only', async () => {
 		const { commands, ev } = setup()
-		const run = jest.fn(async (_ctx: unknown) => undefined)
+		const run = jest.fn<(ctx: unknown) => Promise<undefined>>(async () => undefined)
 		commands.add({ name: 'ping', run })
 		const stop = commands.listen()
 
