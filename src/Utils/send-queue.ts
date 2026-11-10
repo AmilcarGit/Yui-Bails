@@ -160,7 +160,14 @@ export const makeSendQueue = (sock: QueueSocket, options: SendQueueOptions = {})
 				return
 			}
 
-			jobs.push({ jid, content, options: sendOptions, resolve, reject })
+			const rank = PRIORITY[sendOptions?.priority ?? 'normal'] ?? PRIORITY.normal
+			const job: Job = { rank, jid, content, options: withoutPriority(sendOptions), resolve, reject }
+
+			// after everything of the same or higher priority, before the first one that ranks lower
+			const position = jobs.findIndex(waiting => waiting.rank < rank)
+			if (position === -1) jobs.push(job)
+			else jobs.splice(position, 0, job)
+
 			void run()
 		})
 

@@ -161,7 +161,7 @@ describe('makeCommands', () => {
 		await expect(commands.handle(msg('.roto'))).resolves.toBe(true)
 		expect(sent[0]!.content.text).toContain('salió mal')
 
-		const onError = jest.fn()
+		const onError = jest.fn<NonNullable<CommandsOptions['onError']>>()
 		const custom = setup({ onError })
 		custom.commands.add({
 			name: 'roto',

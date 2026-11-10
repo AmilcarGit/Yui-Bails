@@ -126,7 +126,7 @@ describe('makeSendQueue', () => {
 			const { queue, sock } = setup({ typing: false })
 			await queue.sendMessage('a@s.whatsapp.net', { text: 'x' }, { priority: 'high', ephemeralExpiration: 60 })
 
-			const options = sock.sendMessage.mock.calls[0]![2] as Record<string, unknown>
+			const options = (sock.sendMessage.mock.calls[0] as unknown[])[2] as Record<string, unknown>
 			expect(options).toEqual({ ephemeralExpiration: 60 })
 			expect('priority' in options).toBe(false)
 		})
