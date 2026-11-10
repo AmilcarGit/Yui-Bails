@@ -89,6 +89,9 @@ export const makePrettyLogger = ({
 	return logger
 }
 
+/** WhatsApp bookkeeping messages (key exchange, edits, deletes…): nobody wrote them, so they are not logged */
+const INTERNAL = ['protocolMessage', 'senderKeyDistributionMessage', 'fastRatchetKeySenderKeyDistributionMessage']
+
 /** the visible text of a message, cut to `max` characters; media shows its type */
 export const previewMessage = (msg: WAMessage, max = 60): string => {
 	const content = extractMessageContent(msg.message)
@@ -107,7 +110,7 @@ export const previewMessage = (msg: WAMessage, max = 60): string => {
 
 	if (text) return text.length > max ? `${text.slice(0, max - 1)}…` : text
 
-	const kind = Object.keys(content).find(key => key.endsWith('Message'))
+	const kind = Object.keys(content).find(key => key.endsWith('Message') && !INTERNAL.includes(key))
 	return kind ? `[${kind.replace(/Message$/, '')}]` : ''
 }
 

@@ -58,6 +58,12 @@ describe('previewMessage', () => {
 		expect(previewMessage(text('x'.repeat(100)), 10)).toBe('xxxxxxxxx…')
 		expect(previewMessage({ key: {}, message: { imageMessage: {} } } as unknown as WAMessage)).toBe('[image]')
 	})
+
+	it('ignores WhatsApp bookkeeping messages', () => {
+		const internal = (message: object) => ({ key: {}, message }) as unknown as WAMessage
+		expect(previewMessage(internal({ protocolMessage: {} }))).toBe('')
+		expect(previewMessage(internal({ senderKeyDistributionMessage: {} }))).toBe('')
+	})
 })
 
 describe('attachPrettyEvents', () => {
