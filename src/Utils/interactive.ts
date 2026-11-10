@@ -1,6 +1,6 @@
 import { Boom } from '@hapi/boom'
 import type { ButtonSpec, MiscMessageGenerationOptions, WAMessage } from '../Types'
-import type { SenderInfo, SendButtonsOptions } from './helpers'
+import type { SendButtonsOptions, SenderInfo } from './helpers'
 import type { ButtonReply } from './replies'
 
 type Content = Record<string, unknown>
@@ -236,19 +236,18 @@ export const makeInteractive = (
 			let finish: (answer: boolean, label: string) => void = () => undefined
 
 			const result = new Promise<boolean>(resolve => {
-				let timer: ReturnType<typeof setTimeout> | undefined
-				finish = (answer, label) => {
-					if (done) return
-					done = true
-					if (timer) clearTimeout(timer)
-					resolve(answer)
-					if (sent) quiet(sock.disableButtons(sent, `${text}\n\n${label}`))
-				}
-
-				timer = setTimeout(() => {
+				const timer = setTimeout(() => {
 					sessions.delete(token)
 					finish(false, '⌛ Tiempo agotado')
 				}, timeoutMs)
+
+				finish = (answer, label) => {
+					if (done) return
+					done = true
+					clearTimeout(timer)
+					resolve(answer)
+					if (sent) quiet(sock.disableButtons(sent, `${text}\n\n${label}`))
+				}
 			})
 
 			const token = newSession(owner, { ...options, ttlMs: timeoutMs }, timeoutMs, async (_tap, payload) => {
