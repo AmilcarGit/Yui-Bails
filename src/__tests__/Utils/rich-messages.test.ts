@@ -4,7 +4,7 @@ import type { WAMessage } from '../../Types'
 import { sha256 } from '../../Utils/crypto'
 import { type HelperSocket, makeHelpers } from '../../Utils/helpers'
 import { generateWAMessageContent } from '../../Utils/messages'
-import { makeSendExtras } from '../../Utils/send-extras'
+import { type ExtrasDeps, makeSendExtras } from '../../Utils/send-extras'
 
 const GROUP = '1203@g.us'
 const generate = (content: any) => generateWAMessageContent(content, {} as never)
@@ -130,8 +130,8 @@ describe('helpers: sendQuiz and getQuizResult', () => {
 describe('send extras: image poll, scheduled call, status mention and ask', () => {
 	const setup = (deps = {}) => {
 		let counter = 0
-		const sendMessage = jest.fn(
-			async (jid: string, content: unknown) =>
+		const sendMessage = jest.fn<(jid: string, content: unknown, options?: unknown) => Promise<WAMessage>>(
+			async (jid, content) =>
 				({ key: { remoteJid: jid, id: `M${++counter}`, fromMe: true }, message: content }) as unknown as WAMessage
 		)
 		const relayMessage = jest.fn(async () => 'ID')
@@ -140,7 +140,9 @@ describe('send extras: image poll, scheduled call, status mention and ask', () =
 	}
 
 	it('sendImagePoll sends numbered pictures as an album, then the poll', async () => {
-		const sendPoll = jest.fn(async () => ({ key: { id: 'POLL' } }) as unknown as WAMessage)
+		const sendPoll = jest.fn<NonNullable<ExtrasDeps['sendPoll']>>(
+			async () => ({ key: { id: 'POLL' } }) as unknown as WAMessage
+		)
 		const { extras, sendMessage } = setup({ sendPoll })
 
 		const result = await extras.sendImagePoll(GROUP, {
@@ -232,7 +234,7 @@ describe('send extras: image poll, scheduled call, status mention and ask', () =
 
 	it('ask sends the question quoted and returns the text of the answer', async () => {
 		const answer = { key: { id: 'A' }, message: { extendedTextMessage: { text: 'Lima' } } } as unknown as WAMessage
-		const awaitReply = jest.fn(async () => answer)
+		const awaitReply = jest.fn<NonNullable<ExtrasDeps['awaitReply']>>(async () => answer)
 		const { extras, sendMessage } = setup({ awaitReply })
 		const question = { key: { remoteJid: GROUP, id: 'Q' } } as unknown as WAMessage
 
