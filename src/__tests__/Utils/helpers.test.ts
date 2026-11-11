@@ -22,6 +22,14 @@ const makeSock = (extra: Partial<HelperSocket> = {}) => {
 }
 
 describe('getSenderIds', () => {
+	it('gives the push name, so a bot can still greet someone whose number it cannot see', () => {
+		const only = getSenderIds({ key: { remoteJid: '269715926691844@lid', id: '1' }, pushName: 'Ana' })
+		expect(only.number).toBeUndefined()
+		expect(only.name).toBe('Ana')
+		expect(only.jid).toBe('269715926691844@lid')
+		expect(getSenderIds(msg({ remoteJid: '51910227479@s.whatsapp.net', id: '2' })).name).toBeUndefined()
+	})
+
 	it('reads a private chat with a phone-number jid', () => {
 		const s = getSenderIds(msg({ remoteJid: '51910227479@s.whatsapp.net', id: '1' }))
 		expect(s.number).toBe('51910227479')

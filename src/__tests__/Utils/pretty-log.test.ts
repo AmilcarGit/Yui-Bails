@@ -80,4 +80,22 @@ describe('attachPrettyEvents', () => {
 		expect(lines[0]).toContain('📩 privado · 5191 · Amilcar: .ping')
 		expect(lines[1]).toContain('Conectado')
 	})
+
+	it('does not show a LID as if it were a phone number', () => {
+		const handlers: Record<string, (data: any) => void> = {}
+		const lines: string[] = []
+		attachPrettyEvents({ ev: { on: (e, h) => void (handlers[e] = h) } }, line => void lines.push(line))
+
+		const lid = (extra: object) =>
+			({
+				key: { remoteJid: '269715926691844@lid', id: 'B' },
+				message: { conversation: 'hola' },
+				...extra
+			}) as unknown as WAMessage
+		handlers['messages.upsert']!({ type: 'notify', messages: [lid({ pushName: 'Ana' }), lid({})] })
+
+		expect(lines[0]).toContain('privado · Ana (id …1844): hola')
+		expect(lines[1]).toContain('privado · usuario (id …1844): hola')
+		expect(lines.join('\n')).not.toContain('2697159')
+	})
 })

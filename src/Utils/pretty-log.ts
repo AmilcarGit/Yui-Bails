@@ -136,10 +136,14 @@ export const attachPrettyEvents = (sock: LogSocket, write: (line: string) => voi
 			const preview = previewMessage(msg)
 			if (!preview) continue
 
-			const sender = (msg.key.participant || jid).split('@')[0]
+			const from = msg.key.participant || jid
+			const user = from.split('@')[0]!
 			const where = isJidGroup(jid) ? 'grupo' : 'privado'
-			const name = msg.pushName ? ` · ${msg.pushName}` : ''
-			line(msg.key.fromMe ? '📤' : '📩', `${where} · ${sender}${name}: ${preview}`)
+			// a LID is an internal id, not a phone number: show the name and only the end of the id
+			const who = from.endsWith('@lid')
+				? `${msg.pushName || 'usuario'} (id …${user.slice(-4)})`
+				: `${user}${msg.pushName ? ` · ${msg.pushName}` : ''}`
+			line(msg.key.fromMe ? '📤' : '📩', `${where} · ${who}: ${preview}`)
 		}
 	})
 

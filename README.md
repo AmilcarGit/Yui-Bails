@@ -591,6 +591,17 @@ La "caja de pregunta" nativa de WhatsApp no tiene formato documentado; `ask` te 
 
 > No incluimos las "respuestas ricas" de la IA de WhatsApp: son mensajes que genera el propio servidor de WhatsApp y no se pueden crear desde un bot.
 
+## 🪪 Usernames y LID
+
+WhatsApp está probando **usernames** (en el beta de Android) con opciones para ocultar el número de teléfono. Cuando eso llegue, de algunos usuarios solo conocerás su LID (`2696…@lid`), no su número. Yui-Bails ya lo tiene en cuenta:
+
+- `sock.getSender(msg)` devuelve `jid`, `pn` (número, si se conoce), `lid`, `number`, `id` y ahora **`name`** (el nombre que el usuario eligió en WhatsApp). Si solo hay LID, `number` es `undefined` pero `jid`, `id` y `name` siguen sirviendo.
+- `sender.is(['5191…', '2696…'])` acepta números **y** ids LID: pon ambos en la lista de dueños.
+- Los logs bonitos ya no muestran un LID como si fuera un teléfono: ponen el nombre y solo el final del id.
+- Responde y menciona usando `sender.jid`, nunca armes el jid a mano desde un número.
+
+Esto prepara la bails, pero los usernames aún no se pueden probar en cuentas reales.
+
 ## 📱 Multi-sesión (`makeSessionManager`)
 
 Varios números de WhatsApp en un mismo proceso. Cada sesión guarda su login en `<authDir>/<id>/`, tiene su socket y se reconecta sola.

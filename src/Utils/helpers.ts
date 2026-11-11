@@ -27,6 +27,8 @@ export type SenderInfo = {
 	number: string | undefined
 	/** WhatsApp's internal id: the user part of the LID (`undefined` when it is not known) */
 	id: string | undefined
+	/** the name the sender chose in WhatsApp (their push name), when the message carries it. With usernames this may be all you can show */
+	name: string | undefined
 	/** true when the number or the internal id is in `list` (numbers, ids or full jids) */
 	is: (list: string | string[]) => boolean
 }
@@ -44,7 +46,7 @@ const clean = (value: string) => {
  * Reads who sent a message using only the message itself (no network, no lookups).
  * Use `sock.getSender(msg)` to also resolve the missing identity through WhatsApp's LID mapping.
  */
-export const getSenderIds = (msg: Pick<WAMessage, 'key' | 'participant'>, me?: Me): SenderInfo => {
+export const getSenderIds = (msg: Pick<WAMessage, 'key' | 'participant' | 'pushName'>, me?: Me): SenderInfo => {
 	const key: WAMessageKey = msg.key
 	const chat = key.remoteJid || ''
 	const isGroup = !!isJidGroup(chat) || chat === 'status@broadcast'
@@ -67,7 +69,7 @@ export const getSenderIds = (msg: Pick<WAMessage, 'key' | 'participant'>, me?: M
 		}
 	}
 
-	return buildSender({ chat, isGroup, fromMe, pn, lid })
+	return buildSender({ chat, isGroup, fromMe, pn, lid, name: msg.pushName || undefined })
 }
 
 const buildSender = ({
@@ -75,13 +77,15 @@ const buildSender = ({
 	isGroup,
 	fromMe,
 	pn,
-	lid
+	lid,
+	name
 }: {
 	chat: string
 	isGroup: boolean
 	fromMe: boolean
 	pn: string | undefined
 	lid: string | undefined
+	name?: string
 }): SenderInfo => {
 	const number = userPart(pn)
 	const id = userPart(lid)
@@ -96,6 +100,7 @@ const buildSender = ({
 		lid,
 		number,
 		id,
+		name,
 		is: list => (Array.isArray(list) ? list : [list]).map(clean).some(entry => known.includes(entry))
 	}
 }
@@ -298,7 +303,7 @@ export const makeHelpers = (sock: HelperSocket, config: HelperConfig = {}) => {
 				config.logger?.debug({ error }, 'could not resolve the sender through the LID mapping')
 			}
 
-			return buildSender({ chat: base.chat, isGroup: base.isGroup, fromMe: base.fromMe, pn, lid })
+			return buildSender({ chat: base.chat, isGroup: base.isGroup, fromMe: base.fromMe, pn, lid, name: base.name })
 		},
 
 		/** Replies quoting the message. `content` can be a plain string. */
