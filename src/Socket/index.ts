@@ -15,6 +15,7 @@ import { makeMessageStore } from '../Utils/message-store'
 import { attachPrettyEvents } from '../Utils/pretty-log'
 import { makeReplyTools, type ReplySocket } from '../Utils/replies'
 import { makeScheduler } from '../Utils/scheduler'
+import { makeSendExtras } from '../Utils/send-extras'
 import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
 import { makeCommunitiesSocket } from './communities'
 
@@ -140,6 +141,11 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		logger: newConfig.logger
 	})
 
+	// contacts, location, album, event and long text; they go through the (queued) `sock.sendMessage`
+	const extras = makeSendExtras({
+		sendMessage: (jid, content, options) => (sock as any).sendMessage(jid, content, options)
+	})
+
 	// messages for later only go out while the account is connected
 	sock.ev.on('connection.update', ({ connection }) => {
 		if (connection === 'open') scheduler.start()
@@ -161,6 +167,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		health: insights.health,
 		...groups,
 		...interactive,
+		...extras,
 		commands,
 		schedule: scheduler,
 		cooldown: commands.cooldowns.use,

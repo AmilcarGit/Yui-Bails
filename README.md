@@ -50,6 +50,7 @@ Una bails profesional para tu bot de WhatsApp 👑
 | 📱 | **Multi-sesión** | Varios números de WhatsApp en un solo proceso con `makeSessionManager` ([detalles](#-multi-sesión-makesessionmanager)) |
 | 🧭 | **Comandos con roles** | Prefijos, alias, dueño/admin, cooldown y anti-spam con `sock.commands` ([detalles](#-comandos-con-roles-y-cooldown)) |
 | ⏰ | **Mensajes programados** | Una vez, cada cierto tiempo o con cron; se guardan en disco ([detalles](#-mensajes-programados-sockschedule)) |
+| 📤 | **Envíos fáciles** | `sendContact`, `sendLocation`, `sendAlbum`, `sendEvent` y `sendLong` ([detalles](#-envíos-fáciles)) |
 
 ## 🔘 Botones nativos incluidos
 
@@ -508,6 +509,32 @@ sock.schedule.cancel(id)
 - Cron de 5 campos (`minuto hora día mes día-de-semana`) con `*`, listas, rangos y pasos (`*/10`).
 - El contenido debe ser JSON simple: para imágenes usa `{ image: { url } }`, no buffers.
 - Si un envío falla se reintenta a los 30 s (3 intentos) y luego pasa a la siguiente vuelta.
+
+## 📤 Envíos fáciles
+
+Atajos para lo que más se pide. Todos pasan por `sock.sendMessage`, así que respetan la cola anti-ban, las menciones automáticas y las estadísticas.
+
+```js
+// contacto: un número, un objeto o varios
+await sock.sendContact(jid, { name: 'Ana', number: '+51 900 000 001', organization: 'Yui' })
+
+// ubicación
+await sock.sendLocation(jid, { latitude: -12.04, longitude: -77.03, name: 'Lima', address: 'Perú' })
+
+// álbum: de 2 a 10 fotos o videos juntos
+await sock.sendAlbum(jid, [
+  { image: { url: 'https://…/1.jpg' }, caption: 'Primera' },
+  { video: { url: 'https://…/2.mp4' } }
+])
+
+// evento (fechas: Date, milisegundos o texto ISO)
+await sock.sendEvent(jid, { name: 'Fiesta', start: '2026-12-24T20:00:00', location: 'Mi casa' })
+
+// texto largo, partido en varios mensajes sin cortar palabras (solo el primero cita)
+await sock.sendLong(jid, textoMuyLargo, { maxLength: 4000 }, { quoted: msg })
+```
+
+Si pasas datos inválidos (coordenadas fuera de rango, álbum con menos de 2 elementos, un evento que termina antes de empezar…) fallan con un error claro antes de enviar nada. El álbum y el evento dependen de que tu WhatsApp los muestre; pruébalos en tu teléfono antes de confiar en ellos.
 
 ## 📱 Multi-sesión (`makeSessionManager`)
 
