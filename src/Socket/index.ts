@@ -1,5 +1,5 @@
 import { DEFAULT_CONNECTION_CONFIG } from '../Defaults'
-import type { UserFacingSocketConfig } from '../Types'
+import type { GroupMetadata, UserFacingSocketConfig } from '../Types'
 import { type AutomationSocket, makeAutomation } from '../Utils/automation'
 import { printBanner } from '../Utils/banner'
 import { type CommandsSocket, makeCommands } from '../Utils/commands'
@@ -55,8 +55,11 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		config.cachedGroupMetadata === undefined && newConfig.groupMetadataCache !== false
 			? makeGroupMetadataCache(objectOrEmpty(newConfig.groupMetadataCache))
 			: undefined
+	// set below, once the socket exists: the sending code asks for a group's members through
+	// `cachedGroupMetadata`, so it gets the cache, shared requests and retries too
+	let fetchGroup: ((jid: string) => Promise<GroupMetadata>) | undefined
 	if (groupCache) {
-		newConfig.cachedGroupMetadata = async jid => groupCache.get(jid)
+		newConfig.cachedGroupMetadata = async jid => (fetchGroup ? fetchGroup(jid) : groupCache.get(jid))
 		newConfig.onGroupMetadata = (jid, metadata) => groupCache.set(jid, metadata)
 	}
 
@@ -85,6 +88,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	const rawGroupMetadata = sock.groupMetadata
 	const groupMetadata = makeGroupFetcher(rawGroupMetadata, groupCache)
 	sock.groupMetadata = groupMetadata
+	fetchGroup = groupMetadata
 
 	const loose = sock as unknown as HelperSocket & QueueSocket
 

@@ -2,7 +2,7 @@ import type { GroupMetadata } from '../Types'
 import type { GroupMetadataCache } from './group-cache'
 
 export type GroupFetchOptions = {
-	/** retries after a WhatsApp "rate-overlimit" answer. Default 3 */
+	/** retries after a "rate-overlimit", timed out or empty answer. Default 3 */
 	retries?: number
 	/** first wait in ms, doubled each retry. Default 2000 */
 	baseDelayMs?: number
@@ -17,9 +17,22 @@ export const isRateLimited = (error: unknown): boolean => {
 }
 
 /**
+ * Failures that usually pass by themselves: WhatsApp's rate limit, a slow answer, or an empty answer
+ * (no `<group>` node) that shows up when the connection is busy or has just been restored.
+ */
+export const isTransient = (error: unknown): boolean => {
+	const err = error as { message?: string; output?: { statusCode?: number } } | undefined
+	return (
+		isRateLimited(error) ||
+		err?.output?.statusCode === 408 ||
+		/timed out|missing <group> node/i.test(err?.message || '')
+	)
+}
+
+/**
  * Makes `groupMetadata` safe to call often: answers from the cache when it can, shares one request
  * between simultaneous callers of the same group, and waits and retries when WhatsApp says
- * "rate-overlimit" instead of failing right away.
+ * "rate-overlimit" (or answers late or empty) instead of failing right away.
  */
 export const makeGroupFetcher = (
 	fetchGroup: (jid: string) => Promise<GroupMetadata>,
@@ -34,7 +47,7 @@ export const makeGroupFetcher = (
 			try {
 				return await fetchGroup(jid)
 			} catch (error) {
-				if (!isRateLimited(error) || attempt >= retries) throw error
+				if (!isTransient(error) || attempt >= retries) throw error
 				await wait(baseDelayMs * 2 ** attempt)
 			}
 		}

@@ -2,7 +2,7 @@ import { Boom } from '@hapi/boom'
 import { describe, expect, it, jest } from '@jest/globals'
 import type { GroupMetadata } from '../../Types'
 import { makeGroupMetadataCache } from '../../Utils/group-cache'
-import { isRateLimited, makeGroupFetcher } from '../../Utils/group-fetch'
+import { isRateLimited, isTransient, makeGroupFetcher } from '../../Utils/group-fetch'
 
 const group = (id: string) => ({ id, subject: 'Test' }) as GroupMetadata
 const limited = () => Object.assign(new Boom('rate-overlimit'), { data: 429 })
@@ -11,6 +11,25 @@ describe('makeGroupFetcher', () => {
 	it('detects rate limit errors', () => {
 		expect(isRateLimited(limited())).toBe(true)
 		expect(isRateLimited(new Error('boom'))).toBe(false)
+	})
+
+	it('treats slow and empty answers as transient, but not real errors', () => {
+		expect(isTransient(limited())).toBe(true)
+		expect(isTransient(new Boom('Timed Out', { statusCode: 408 }))).toBe(true)
+		expect(isTransient(new Boom('Invalid group metadata response: missing <group> node'))).toBe(true)
+		expect(isTransient(new Boom('forbidden', { statusCode: 403 }))).toBe(false)
+		expect(isTransient(undefined)).toBe(false)
+	})
+
+	it('retries an empty answer (no <group> node)', async () => {
+		const fetchGroup = jest
+			.fn<(jid: string) => Promise<GroupMetadata>>()
+			.mockRejectedValueOnce(new Boom('Invalid group metadata response: missing <group> node'))
+			.mockResolvedValueOnce(group('a@g.us'))
+		const get = makeGroupFetcher(fetchGroup, undefined, { sleep: async () => undefined })
+
+		await expect(get('a@g.us')).resolves.toEqual(group('a@g.us'))
+		expect(fetchGroup).toHaveBeenCalledTimes(2)
 	})
 
 	it('shares one request between simultaneous callers', async () => {
