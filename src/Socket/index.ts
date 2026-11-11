@@ -57,9 +57,9 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 			: undefined
 	// set below, once the socket exists: the sending code asks for a group's members through
 	// `cachedGroupMetadata`, so it gets the cache, shared requests and retries too
-	let fetchGroup: ((jid: string) => Promise<GroupMetadata>) | undefined
+	const lazy: { fetchGroup?: (jid: string) => Promise<GroupMetadata> } = {}
 	if (groupCache) {
-		newConfig.cachedGroupMetadata = async jid => (fetchGroup ? fetchGroup(jid) : groupCache.get(jid))
+		newConfig.cachedGroupMetadata = async jid => (lazy.fetchGroup ? lazy.fetchGroup(jid) : groupCache.get(jid))
 		newConfig.onGroupMetadata = (jid, metadata) => groupCache.set(jid, metadata)
 	}
 
@@ -88,7 +88,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	const rawGroupMetadata = sock.groupMetadata
 	const groupMetadata = makeGroupFetcher(rawGroupMetadata, groupCache)
 	sock.groupMetadata = groupMetadata
-	fetchGroup = groupMetadata
+	lazy.fetchGroup = groupMetadata
 
 	const loose = sock as unknown as HelperSocket & QueueSocket
 
