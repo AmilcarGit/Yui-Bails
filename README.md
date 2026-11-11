@@ -51,6 +51,7 @@ Una bails profesional para tu bot de WhatsApp 👑
 | 🧭 | **Comandos con roles** | Prefijos, alias, dueño/admin, cooldown y anti-spam con `sock.commands` ([detalles](#-comandos-con-roles-y-cooldown)) |
 | ⏰ | **Mensajes programados** | Una vez, cada cierto tiempo o con cron; se guardan en disco ([detalles](#-mensajes-programados-sockschedule)) |
 | 📤 | **Envíos fáciles** | `sendContact`, `sendLocation`, `sendAlbum`, `sendEvent` y `sendLong` ([detalles](#-envíos-fáciles)) |
+| 🧠 | **Quiz y más (experimental)** | `sendQuiz`, `sendImagePoll`, `sendScheduledCall`, `sendStatusMention` y `ask` ([detalles](#-quiz-y-novedades-experimentales)) |
 
 ## 🔘 Botones nativos incluidos
 
@@ -535,6 +536,60 @@ await sock.sendLong(jid, textoMuyLargo, { maxLength: 4000 }, { quoted: msg })
 ```
 
 Si pasas datos inválidos (coordenadas fuera de rango, álbum con menos de 2 elementos, un evento que termina antes de empezar…) fallan con un error claro antes de enviar nada. El álbum y el evento dependen de que tu WhatsApp los muestre; pruébalos en tu teléfono antes de confiar en ellos.
+
+## 🧠 Quiz y novedades experimentales
+
+Salen de campos que **existen en el protocolo de WhatsApp** pero que no hemos confirmado en todos los teléfonos y versiones: si WhatsApp no los soporta, el mensaje puede llegar como una encuesta o mensaje normal. Pruébalos en tu cuenta antes de ofrecerlos.
+
+### Quiz (encuesta con respuesta correcta)
+
+```js
+const sent = await sock.sendQuiz(jid, '¿Capital de Perú?', ['Lima', 'Quito', 'Bogotá'], 0) // 0 = primera opción, o el texto 'Lima'
+
+// cuando llegan votos (evento poll.votes) o cuando quieras:
+const resultado = sock.getQuizResult(sent.key)
+// { correct: 'Lima', right: [jids que acertaron], wrong: [jids que fallaron], votes: [...] }
+```
+
+También puedes usar `sock.sendMessage(jid, { poll: { name, values, correctAnswer: 'Lima' } })`. Un quiz tiene una sola respuesta correcta.
+
+### Encuesta con imágenes
+
+WhatsApp tiene un tipo propio de "encuesta con imágenes", pero su formato no está documentado. `sendImagePoll` hace lo que sí funciona en todas las versiones: manda las fotos como álbum (cada una numerada con su opción) y después una encuesta normal con esas opciones.
+
+```js
+await sock.sendImagePoll(jid, {
+  name: '¿Cuál prefieres?',
+  options: [
+    { text: 'Gato', image: { url: 'https://…/gato.jpg' } },
+    { text: 'Perro', image: { url: 'https://…/perro.jpg' } }
+  ]
+})
+```
+
+### Llamada programada
+
+```js
+await sock.sendScheduledCall(jid, { title: 'Reunión', start: '2026-12-24T20:00:00', type: 'video' })
+```
+
+### Estado que menciona a personas
+
+```js
+await sock.sendStatusMention({ text: '¡Feliz año! 🎉' }, { mentions: ['5731XXXXXXXX@s.whatsapp.net'], backgroundColor: '#1b5e20' })
+```
+
+Publica el estado y avisa a cada persona mencionada, como hacen otras librerías. Es la parte menos probada.
+
+### Preguntar y esperar la respuesta
+
+```js
+const nombre = await sock.ask(msg, '¿Cómo te llamas?', { timeoutMs: 30_000 }) // texto, o undefined si no contestó
+```
+
+La "caja de pregunta" nativa de WhatsApp no tiene formato documentado; `ask` te da lo mismo con un mensaje normal.
+
+> No incluimos las "respuestas ricas" de la IA de WhatsApp: son mensajes que genera el propio servidor de WhatsApp y no se pueden crear desde un bot.
 
 ## 📱 Multi-sesión (`makeSessionManager`)
 

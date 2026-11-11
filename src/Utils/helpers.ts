@@ -219,6 +219,12 @@ export const makeHelpers = (sock: HelperSocket, config: HelperConfig = {}) => {
 		message?.pollCreationMessageV3?.name ||
 		''
 
+	const findPoll = (pollKey: WAMessageKey | string) => {
+		const id =
+			typeof pollKey === 'string' ? [...polls.keys()].find(entry => entry.endsWith(`|${pollKey}`)) : pollIdOf(pollKey)
+		return id ? polls.get(id) : undefined
+	}
+
 	sock.ev.on('messages.upsert', ({ messages }: { messages: WAMessage[] }) => {
 		for (const msg of messages || []) remember(msg)
 	})
@@ -406,17 +412,47 @@ export const makeHelpers = (sock: HelperSocket, config: HelperConfig = {}) => {
 			return sent
 		},
 
+		/**
+		 * Sends a quiz: a poll with one right answer (its text or position, 0 = first).
+		 * Experimental: it depends on the WhatsApp version that receives it. Use `getQuizResult` to score it.
+		 */
+		sendQuiz: async (
+			jid: string,
+			name: string,
+			values: string[],
+			correctAnswer: string | number,
+			options?: MiscMessageGenerationOptions
+		) => {
+			const sent = await sock.sendMessage(jid, { poll: { name, values, selectableCount: 1, correctAnswer } }, options)
+			remember(sent)
+			return sent
+		},
+
 		/** Current results of a poll created by (or seen by) this socket. */
 		getPollVotes: (pollKey: WAMessageKey | string) => {
-			const id =
-				typeof pollKey === 'string' ? [...polls.keys()].find(entry => entry.endsWith(`|${pollKey}`)) : pollIdOf(pollKey)
-			const tracked = id ? polls.get(id) : undefined
+			const tracked = findPoll(pollKey)
 			if (!tracked) return undefined
 			return {
 				pollKey: tracked.key,
 				pollName: pollName(tracked.message),
 				votes: aggregate(tracked, sock.user?.id)
 			}
+		},
+
+		/** Who got a quiz right and who got it wrong (`undefined` when the poll is not a quiz this socket knows). */
+		getQuizResult: (pollKey: WAMessageKey | string) => {
+			const tracked = findPoll(pollKey)
+			const poll =
+				tracked?.message?.pollCreationMessageV3 ||
+				tracked?.message?.pollCreationMessage ||
+				tracked?.message?.pollCreationMessageV2
+			const correct = poll?.correctAnswer?.optionName
+			if (!tracked || !correct) return undefined
+
+			const votes = aggregate(tracked, sock.user?.id)
+			const right = votes.find(option => option.name === correct)?.voters ?? []
+			const wrong = [...new Set(votes.filter(option => option.name !== correct).flatMap(option => option.voters))]
+			return { pollKey: tracked.key, pollName: pollName(tracked.message), correct, right, wrong, votes }
 		},
 
 		/**

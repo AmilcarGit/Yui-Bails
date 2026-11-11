@@ -1421,7 +1421,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					useCachedGroupMetadata: options.useCachedGroupMetadata,
 					additionalAttributes,
 					statusJidList: options.statusJidList,
-					additionalNodes
+					additionalNodes: options.additionalNodes ? [...additionalNodes, ...options.additionalNodes] : additionalNodes
 				})
 				if (config.emitOwnEvents) {
 					process.nextTick(async () => {

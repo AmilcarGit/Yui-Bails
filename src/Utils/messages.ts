@@ -625,8 +625,24 @@ export const generateWAMessageContent = async (
 		m.eventMessage.extraGuestsAllowed = message.event.extraGuestsAllowed
 		m.eventMessage.isScheduleCall = message.event.isScheduleCall ?? false
 		m.eventMessage.location = message.event.location
+	} else if (hasNonNullishProperty(message, 'scheduledCall')) {
+		const { title, startDate, type } = message.scheduledCall
+		if (!title) throw new Boom('A scheduled call needs a title', { statusCode: 400 })
+		if (!(startDate instanceof Date) || Number.isNaN(startDate.getTime())) {
+			throw new Boom('A scheduled call needs a valid startDate', { statusCode: 400 })
+		}
+
+		m.scheduledCallCreationMessage = {
+			title,
+			scheduledTimestampMs: startDate.getTime(),
+			callType:
+				type === 'video'
+					? proto.Message.ScheduledCallCreationMessage.CallType.VIDEO
+					: proto.Message.ScheduledCallCreationMessage.CallType.VOICE
+		}
 	} else if (hasNonNullishProperty(message, 'poll')) {
-		message.poll.selectableCount ||= 0
+		// a quiz has exactly one answer
+		message.poll.selectableCount ||= message.poll.correctAnswer === undefined ? 0 : 1
 		message.poll.toAnnouncementGroup ||= false
 
 		if (!Array.isArray(message.poll.values)) {
@@ -644,10 +660,27 @@ export const generateWAMessageContent = async (
 			messageSecret: message.poll.messageSecret || randomBytes(32)
 		}
 
-		const pollCreationMessage = {
+		const pollCreationMessage: proto.Message.IPollCreationMessage = {
 			name: message.poll.name,
 			selectableOptionsCount: message.poll.selectableCount,
 			options: message.poll.values.map(optionName => ({ optionName }))
+		}
+
+		if (message.poll.correctAnswer !== undefined) {
+			const { correctAnswer, values, selectableCount } = message.poll
+			const correct = typeof correctAnswer === 'number' ? values[correctAnswer] : correctAnswer
+			if (correct === undefined || !values.includes(correct)) {
+				throw new Boom('poll.correctAnswer must be one of the poll options (its text or its position)', {
+					statusCode: 400
+				})
+			}
+
+			if (selectableCount !== 1) {
+				throw new Boom('A quiz has exactly one correct answer: selectableCount must be 1', { statusCode: 400 })
+			}
+
+			pollCreationMessage.pollType = proto.Message.PollType.QUIZ
+			pollCreationMessage.correctAnswer = { optionName: correct }
 		}
 
 		if (message.poll.toAnnouncementGroup) {

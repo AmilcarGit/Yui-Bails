@@ -12,7 +12,7 @@ const setup = () => {
 				options
 			}) as unknown as WAMessage
 	)
-	const extras = makeSendExtras({ sendMessage: sendMessage as never }, async () => undefined)
+	const extras = makeSendExtras({ sendMessage: sendMessage as never }, { sleep: async () => undefined })
 	return { extras, sendMessage }
 }
 
@@ -147,7 +147,7 @@ describe('makeSendExtras', () => {
 	it('sendLong waits between parts when asked', async () => {
 		const sleeps: number[] = []
 		const sendMessage = jest.fn(async () => undefined)
-		const extras = makeSendExtras({ sendMessage: sendMessage as never }, async ms => void sleeps.push(ms))
+		const extras = makeSendExtras({ sendMessage: sendMessage as never }, { sleep: async ms => void sleeps.push(ms) })
 
 		await extras.sendLong(JID, `${'a'.repeat(15)} ${'b'.repeat(15)} ${'c'.repeat(15)}`, { maxLength: 20, delayMs: 700 })
 		expect(sleeps).toEqual([700, 700])

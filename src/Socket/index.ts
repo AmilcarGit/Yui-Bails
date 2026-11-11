@@ -142,9 +142,16 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	})
 
 	// contacts, location, album, event and long text; they go through the (queued) `sock.sendMessage`
-	const extras = makeSendExtras({
-		sendMessage: (jid, content, options) => (sock as any).sendMessage(jid, content, options)
-	})
+	const extras = makeSendExtras(
+		{
+			sendMessage: (jid, content, options) => (sock as any).sendMessage(jid, content, options),
+			relayMessage: (jid, message, options) => sock.relayMessage(jid, message, options)
+		},
+		{
+			sendPoll: (...args) => (sock as any).sendPoll(...args),
+			awaitReply: (...args) => replies.awaitReply(...args)
+		}
+	)
 
 	// messages for later only go out while the account is connected
 	sock.ev.on('connection.update', ({ connection }) => {

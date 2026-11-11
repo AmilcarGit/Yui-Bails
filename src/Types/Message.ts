@@ -146,6 +146,11 @@ export type PollMessageOptions = {
 	/** 32 byte message secret to encrypt poll selections */
 	messageSecret?: Uint8Array
 	toAnnouncementGroup?: boolean
+	/**
+	 * Makes it a quiz: the right option, as its text or its position (0 = first). A quiz has one answer,
+	 * so `selectableCount` is 1. Experimental: it depends on the WhatsApp version that receives it.
+	 */
+	correctAnswer?: string | number
 }
 
 export type EventMessageOptions = {
@@ -159,6 +164,14 @@ export type EventMessageOptions = {
 	isScheduleCall?: boolean
 	extraGuestsAllowed?: boolean
 	messageSecret?: Uint8Array<ArrayBufferLike>
+}
+
+export type ScheduledCallOptions = {
+	title: string
+	/** when the call is planned */
+	startDate: Date
+	/** default `voice` */
+	type?: 'voice' | 'video'
 }
 
 export type AlbumMessageOptions = {
@@ -327,6 +340,7 @@ export type AnyRegularMessageContent = (
 			Editable)
 	| AnyMediaMessageContent
 	| { event: EventMessageOptions }
+	| { scheduledCall: ScheduledCallOptions }
 	| ({
 			poll: PollMessageOptions
 	  } & Mentionable &
@@ -433,6 +447,8 @@ export type MiscMessageGenerationOptions = MinimalRelayOptions & {
 	mediaUploadTimeoutMs?: number
 	/** jid list of participants for status@broadcast */
 	statusJidList?: string[]
+	/** extra nodes for the stanza (WhatsApp metadata such as `<meta/>`); for advanced use */
+	additionalNodes?: BinaryNode[]
 	/** backgroundcolor for status */
 	backgroundColor?: string
 	/** font type for status */
