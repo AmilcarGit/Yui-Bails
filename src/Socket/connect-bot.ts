@@ -92,6 +92,9 @@ export const connectBot = async (options: ConnectBotOptions) => {
 		log(
 			'   En el teléfono: WhatsApp > Dispositivos vinculados > Vincular un dispositivo > Vincular con el número de teléfono'
 		)
+		log(
+			'   ¿No te llegó la notificación? Es normal a veces: escribe el código ahí a mano, funciona igual (dura ~1 min).'
+		)
 	})
 
 	manager.on('session.qr', ({ qr }) => {
