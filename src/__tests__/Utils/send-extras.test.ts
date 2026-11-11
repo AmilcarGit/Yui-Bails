@@ -26,7 +26,7 @@ describe('buildVCard', () => {
 	})
 
 	it('escapes separators and rejects numbers without digits', () => {
-		expect(buildVCard({ name: 'Pérez, Ana;\nX', number: '1' })).toContain('FN:Pérez\\, Ana\; X')
+		expect(buildVCard({ name: 'Pérez, Ana;\nX', number: '1' })).toContain('FN:Pérez\\, Ana\\; X')
 		expect(() => buildVCard({ name: 'Ana', number: 'abc' })).toThrow(/phone number/)
 	})
 })
