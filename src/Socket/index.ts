@@ -16,9 +16,9 @@ import { attachPrettyEvents } from '../Utils/pretty-log'
 import { makeReplyTools, type ReplySocket } from '../Utils/replies'
 import { makeScheduler } from '../Utils/scheduler'
 import { makeSendExtras } from '../Utils/send-extras'
+import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
 import { withSendRetry } from '../Utils/send-retry'
 import { makeTimedPolls } from '../Utils/timed-poll'
-import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
 import { makeCommunitiesSocket } from './communities'
 
 const objectOrEmpty = <T extends object>(value: boolean | T | undefined): T =>

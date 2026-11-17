@@ -1,6 +1,6 @@
-import { describe, expect, it, jest } from '@jest/globals'
 import { Boom } from '@hapi/boom'
-import { mkdtemp, readFile, writeFile, mkdir, readdir } from 'fs/promises'
+import { describe, expect, it, jest } from '@jest/globals'
+import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { gzipSync } from 'zlib'
