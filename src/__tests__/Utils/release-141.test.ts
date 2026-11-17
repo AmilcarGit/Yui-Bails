@@ -50,7 +50,7 @@ describe('withSendRetry', () => {
 	})
 
 	it('gives up after the retries and never retries real errors', async () => {
-		const failing = jest.fn(async () => {
+		const failing = jest.fn<(jid: string, content: unknown, options?: any) => Promise<string>>(async () => {
 			throw timedOut()
 		})
 		await expect(withSendRetry(failing, { retries: 1, sleep: async () => undefined })(GROUP, {})).rejects.toThrow(
@@ -58,7 +58,7 @@ describe('withSendRetry', () => {
 		)
 		expect(failing).toHaveBeenCalledTimes(2)
 
-		const forbidden = jest.fn(async () => {
+		const forbidden = jest.fn<(jid: string, content: unknown, options?: any) => Promise<string>>(async () => {
 			throw new Boom('forbidden', { statusCode: 403 })
 		})
 		await expect(withSendRetry(forbidden, { sleep: async () => undefined })(GROUP, {})).rejects.toThrow('forbidden')
@@ -68,7 +68,7 @@ describe('withSendRetry', () => {
 	it('reports each retry', async () => {
 		const onRetry = jest.fn()
 		let first = true
-		const send = jest.fn(async () => {
+		const send = jest.fn<(jid: string, content: unknown, options?: any) => Promise<string>>(async () => {
 			if (first) {
 				first = false
 				throw timedOut()
@@ -138,7 +138,7 @@ describe('timed polls', () => {
 
 	it('sends the result, quoting the poll, when time is up', async () => {
 		const { polls, sent, message, fire } = setup()
-		const onClose = jest.fn()
+		const onClose = jest.fn<(result: any) => void>()
 		const timed = await polls.sendTimedPoll(GROUP, 'Pizza', ['Sí', 'No'], {
 			closeAfter: '10m',
 			showVoters: false,
@@ -234,7 +234,9 @@ describe('session backup', () => {
 
 describe('tagAll', () => {
 	it('mentions every member by default, or uses the native @all', async () => {
-		const sendMessage = jest.fn(async () => undefined)
+		const sendMessage = jest.fn<(jid: string, content: unknown, options?: unknown) => Promise<undefined>>(
+			async () => undefined
+		)
 		const extras = makeSendExtras(
 			{ sendMessage: sendMessage as never },
 			{ groupMetadata: async () => ({ participants: [{ id: A }, { id: B }, { id: A }] }) }

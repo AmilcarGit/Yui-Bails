@@ -85,8 +85,8 @@ describe('htmlToWhatsApp', () => {
 describe('sendHtml', () => {
 	const setup = () => {
 		const sendMessage = jest.fn(
-			async (jid: string, content: unknown) =>
-				({ key: { remoteJid: jid, id: 'M1', fromMe: true }, message: content }) as unknown as WAMessage
+			async (jid: string, content: unknown, options?: unknown) =>
+				({ key: { remoteJid: jid, id: 'M1', fromMe: true }, message: content, options }) as unknown as WAMessage
 		)
 		const extras = makeSendExtras({ sendMessage: sendMessage as never }, { sleep: async () => undefined })
 		return { extras, sendMessage }
