@@ -3,6 +3,7 @@ import type { MessageRelayOptions, MiscMessageGenerationOptions, WAMessage } fro
 import { WAProto } from '../Types'
 import type { BinaryNode } from '../WABinary'
 import { generateMessageIDV2 } from './generics'
+import { htmlToWhatsApp } from './html-format'
 
 type SendFn = (jid: string, content: any, options?: MiscMessageGenerationOptions) => Promise<WAMessage | undefined>
 
@@ -23,6 +24,8 @@ export type ExtrasDeps = {
 		poll?: { selectableCount?: number },
 		options?: MiscMessageGenerationOptions
 	) => Promise<WAMessage | undefined>
+	/** members of a group (`sock.groupMetadata`); needed by `tagAll` */
+	groupMetadata?: (jid: string) => Promise<{ participants: Array<{ id: string }> }>
 	/** waits for the next message of a user (`sock.awaitReply`); needed by `ask` */
 	awaitReply?: (msg: WAMessage, options?: { timeoutMs?: number }) => Promise<WAMessage | undefined>
 }
@@ -82,6 +85,14 @@ export type StatusMentionOptions = {
 	mentions: string[]
 	backgroundColor?: string
 	font?: number
+}
+
+export type TagAllOptions = {
+	/**
+	 * `members` (default): mentions every member one by one, so everyone is notified in every version.
+	 * `all`: WhatsApp's own "@all" (only admins can use it in groups of more than 32 people).
+	 */
+	mode?: 'members' | 'all'
 }
 
 export type AskOptions = {
@@ -350,6 +361,35 @@ export const makeSendExtras = (sock: ExtrasSocket, deps: ExtrasDeps = {}) => {
 			}
 
 			return status
+		},
+
+		/**
+		 * Sends HTML as a WhatsApp message. WhatsApp has no HTML, so `<b>`, `<i>`, `<s>`, `<code>`, `<pre>`,
+		 * lists, quotes, links and simple tables become its own formatting; anything else keeps only its text.
+		 */
+		sendHtml: async (jid: string, html: string, options?: MiscMessageGenerationOptions) => {
+			const text = htmlToWhatsApp(html)
+			if (!text) throw new Boom('The HTML has no text to send', { statusCode: 400 })
+			return sock.sendMessage(jid, { text }, options)
+		},
+
+		/**
+		 * Notifies the whole group with one message. With `members` (default) the text can be anything,
+		 * even empty-looking, and every member is mentioned; with `all` it uses WhatsApp's "@all".
+		 */
+		tagAll: async (
+			jid: string,
+			text: string,
+			{ mode = 'members' }: TagAllOptions = {},
+			options?: MiscMessageGenerationOptions
+		) => {
+			if (!jid.endsWith('@g.us')) throw new Boom('tagAll only works in groups', { statusCode: 400 })
+			if (mode === 'all') return sock.sendMessage(jid, { text, mentionAll: true }, options)
+
+			if (!deps.groupMetadata) throw new Boom('This socket cannot read group members', { statusCode: 501 })
+			const group = await deps.groupMetadata(jid)
+			const mentions = [...new Set(group.participants.map(member => member.id))]
+			return sock.sendMessage(jid, { text, mentions }, options)
 		},
 
 		/**

@@ -3,6 +3,7 @@ import type { URL } from 'url'
 import { proto } from '../../WAProto/index.js'
 import type { CommandsOptions } from '../Utils/commands'
 import type { ILogger } from '../Utils/logger'
+import type { SendRetryOptions } from '../Utils/send-retry'
 import type { SendQueueOptions } from '../Utils/send-queue'
 import type { AuthenticationState, LIDMapping, SignalAuthState, TransactionCapabilityOptions } from './Auth'
 import type { GroupMetadata } from './GroupMetadata'
@@ -199,6 +200,13 @@ export type SocketConfig = {
 
 	/** JSON file where `sock.schedule` keeps pending messages so they survive a restart */
 	schedulerFile?: string
+
+	/**
+	 * Retries a send that fails because of the rate limit, a timeout or an empty answer, waiting a bit
+	 * longer each time and reusing the message id so the message never arrives twice.
+	 * On by default (2 retries); `false` turns it off.
+	 */
+	sendRetry?: boolean | SendRetryOptions
 
 	/**
 	 * Prints one readable line per incoming message and per connection change

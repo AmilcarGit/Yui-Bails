@@ -1,4 +1,4 @@
-import { renderBanner } from '../../Utils/banner'
+import { bannerDisabled, renderBanner } from '../../Utils/banner'
 
 // eslint-disable-next-line no-control-regex
 const plain = (text: string) => text.replace(/\x1b\[[0-9;]*m/g, '')
@@ -26,5 +26,17 @@ describe('renderBanner', () => {
 		expect(text).toContain('v9.9.9')
 		expect(text).toContain('AmilcarGit')
 		expect(text).toContain('github.com/AmilcarGit/Yui-Bails')
+	})
+})
+
+describe('bannerDisabled', () => {
+	it('only an on-value turns the banner off', () => {
+		expect(bannerDisabled(undefined)).toBe(false)
+		expect(bannerDisabled('')).toBe(false)
+		expect(bannerDisabled('0')).toBe(false)
+		expect(bannerDisabled('false')).toBe(false)
+		expect(bannerDisabled(' OFF ')).toBe(false)
+		expect(bannerDisabled('1')).toBe(true)
+		expect(bannerDisabled('true')).toBe(true)
 	})
 })

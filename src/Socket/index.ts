@@ -16,6 +16,8 @@ import { attachPrettyEvents } from '../Utils/pretty-log'
 import { makeReplyTools, type ReplySocket } from '../Utils/replies'
 import { makeScheduler } from '../Utils/scheduler'
 import { makeSendExtras } from '../Utils/send-extras'
+import { withSendRetry } from '../Utils/send-retry'
+import { makeTimedPolls } from '../Utils/timed-poll'
 import { makeSendQueue, type QueueSocket, type SendQueue } from '../Utils/send-queue'
 import { makeCommunitiesSocket } from './communities'
 
@@ -64,6 +66,19 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 	}
 
 	const sock = makeCommunitiesSocket(newConfig)
+
+	// failed sends that usually pass (rate limit, timeout) are tried again with the same message id
+	if (newConfig.sendRetry !== false) {
+		const retry = typeof newConfig.sendRetry === 'object' ? newConfig.sendRetry : {}
+		sock.sendMessage = withSendRetry(
+			sock.sendMessage as unknown as (jid: string, content: any, options?: any) => Promise<any>,
+			{
+				userId: () => sock.user?.id,
+				onRetry: (error, attempt) => newConfig.logger?.debug({ error, attempt }, 'retrying a failed send'),
+				...retry
+			}
+		) as unknown as typeof sock.sendMessage
+	}
 
 	if (store) {
 		sock.ev.on('messages.upsert', ({ messages }) => {
@@ -152,10 +167,19 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 			relayMessage: (jid, message, options) => sock.relayMessage(jid, message, options)
 		},
 		{
+			groupMetadata: jid => sock.groupMetadata(jid),
 			sendPoll: (...args) => (sock as any).sendPoll(...args),
 			awaitReply: (...args) => replies.awaitReply(...args)
 		}
 	)
+
+	// polls that close by themselves and announce the result
+	const timedPolls = makeTimedPolls({
+		sendPoll: (...args) => (sock as any).sendPoll(...args),
+		getPollVotes: key => helpers.getPollVotes(key),
+		sendMessage: (jid, content, options) => (sock as any).sendMessage(jid, content, options),
+		logger: newConfig.logger
+	})
 
 	// messages for later only go out while the account is connected
 	sock.ev.on('connection.update', ({ connection }) => {
@@ -179,6 +203,8 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		...groups,
 		...interactive,
 		...extras,
+		sendTimedPoll: timedPolls.sendTimedPoll,
+		openPolls: timedPolls.openPolls,
 		commands,
 		schedule: scheduler,
 		cooldown: commands.cooldowns.use,

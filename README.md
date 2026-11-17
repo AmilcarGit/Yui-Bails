@@ -537,6 +537,81 @@ await sock.sendLong(jid, textoMuyLargo, { maxLength: 4000 }, { quoted: msg })
 
 Si pasas datos inválidos (coordenadas fuera de rango, álbum con menos de 2 elementos, un evento que termina antes de empezar…) fallan con un error claro antes de enviar nada. El álbum y el evento dependen de que tu WhatsApp los muestre; pruébalos en tu teléfono antes de confiar en ellos.
 
+### HTML → formato de WhatsApp (`sendHtml`)
+
+WhatsApp **no tiene HTML**: solo su propio formato (`*negrita*`, `_cursiva_`, `~tachado~`, `` `código` ``, listas, citas). `sendHtml` convierte un HTML sencillo a ese formato y lo envía como texto normal, así se ve igual en todos los teléfonos.
+
+```js
+await sock.sendHtml(jid, `
+  <h1>Menú</h1>
+  <p>Hola <b>amigos</b>, mira <a href="https://github.com/AmilcarGit/Yui-Bails">Yui-Bails</a></p>
+  <ul><li>.ping</li><li>.menu</li></ul>
+  <pre>const x = 1</pre>
+`)
+
+// o solo convertir, sin enviar
+import { htmlToWhatsApp } from '@yui-bails/yui-bails'
+const texto = htmlToWhatsApp('<b>Hola</b> <i>mundo</i>') // "*Hola* _mundo_"
+```
+
+| HTML | Resultado |
+|---|---|
+| `<b>`, `<strong>` · `<i>`, `<em>` · `<s>`, `<del>` | `*…*` · `_…_` · `~…~` |
+| `<code>`, `<kbd>` · `<pre>` | `` `…` `` · bloque ```` ``` ```` |
+| `<h1>`…`<h6>` | línea en negrita |
+| `<ul>`, `<ol>`, `<li>` (anidadas) | `- …` / `1. …` |
+| `<blockquote>` | `> …` |
+| `<a href>` | `texto (url)`; solo `http`, `https`, `mailto` y `tel` |
+| `<table>` | una fila por línea: `celda \| celda` (las `<th>` en negrita) |
+| `<br>`, `<p>`, `<hr>`, `<div>` | saltos de línea |
+
+Lo demás (`<script>`, `<style>`, `<iframe>`, atributos como `onclick`, etiquetas desconocidas) se descarta y solo se conserva el texto. No se dibujan colores, tamaños, imágenes ni tablas reales: WhatsApp no puede mostrarlos en un mensaje de texto. Un `*` suelto dentro del texto puede ser leído por WhatsApp como negrita.
+
+### Avisar a todo el grupo (`tagAll`)
+
+```js
+// menciona a cada miembro (el texto puede ser cualquiera)
+await sock.tagAll(jid, '📢 Reunión a las 8')
+
+// usa el "@todos" de WhatsApp
+await sock.tagAll(jid, '📢 Reunión a las 8', { mode: 'all' })
+```
+
+El modo `all` depende de que tu WhatsApp lo soporte; `members` (por defecto) funciona siempre. Solo en grupos.
+
+### Encuesta que se cierra sola (`sendTimedPoll`)
+
+```js
+await sock.sendTimedPoll(jid, '¿Pizza o tacos?', ['Pizza', 'Tacos'], {
+  closeAfter: '10m', // de 5 s a 24 días: '30s', '2h', '1d' o milisegundos
+  showVoters: false,
+  onClose: async result => console.log(result)
+})
+console.log(sock.openPolls()) // las que siguen abiertas
+```
+
+Al cerrar, avisa en el chat con el resultado y los votos de cada opción. El cierre lo hace el bot (WhatsApp no tiene fecha de cierre en las encuestas), así que **si el bot se reinicia antes, la encuesta ya no se cierra sola**.
+
+### Reintentos al enviar (`sendRetry`)
+
+Si un envío falla por un problema temporal (conexión caída, tiempo agotado), `sock.sendMessage` lo reintenta hasta 2 veces con esperas crecientes. Usa **el mismo id de mensaje** en cada intento, así que si el primero sí llegó pero perdiste la respuesta, no se duplica. Los errores definitivos (número inválido, contenido erróneo) no se reintentan.
+
+```js
+makeWASocket({ auth, sendRetry: false })                        // desactivar
+makeWASocket({ auth, sendRetry: { retries: 4, baseDelayMs: 500 } }) // ajustar
+```
+
+### Respaldo de la sesión
+
+```js
+import { backupSession, restoreSession } from '@yui-bails/yui-bails'
+
+await backupSession('./sesion', './respaldo-2026-11-17.ysb') // un archivo comprimido, permisos 0600
+await restoreSession('./respaldo-2026-11-17.ysb', './sesion') // no sobrescribe: falla si ya hay una sesión
+```
+
+El respaldo contiene **tus credenciales**: quien lo tenga puede usar tu WhatsApp. Guárdalo en un lugar privado y nunca lo mandes por chat ni lo subas a GitHub. Al restaurar solo se aceptan nombres de archivo simples (nada de rutas con `..`).
+
 ## 🧠 Quiz y novedades experimentales
 
 Salen de campos que **existen en el protocolo de WhatsApp** pero que no hemos confirmado en todos los teléfonos y versiones: si WhatsApp no los soporta, el mensaje puede llegar como una encuesta o mensaje normal. Pruébalos en tu cuenta antes de ofrecerlos.
@@ -725,7 +800,7 @@ Las miniaturas de video usan `ffmpeg` lanzado sin shell (`spawn`), así que ruta
 | `YUI_BAILS_BUTTONS_FORMAT=buttons` | Cambia el formato de botones a `ButtonsMessage` clásico (ver abajo) |
 | `YUI_BAILS_LOG_LEVEL=info` | Reactiva los logs internos (por defecto: silencio total) |
 | `YUI_BAILS_VERBOSE=1` | Muestra también el ruido de libsignal (desactiva el filtro) |
-| `YUI_BAILS_NO_BANNER=1` | Oculta el banner de arranque |
+| `YUI_BAILS_NO_BANNER=1` | Oculta el banner de arranque (`0`, `false`, `no`, `off` o vacío lo dejan visible) |
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%" alt="divider" />

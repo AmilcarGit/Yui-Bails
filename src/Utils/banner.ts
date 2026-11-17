@@ -1,6 +1,6 @@
 /**
  * Prints the Yui-Bails banner once per process.
- * Set YUI_BAILS_NO_BANNER=1 to disable it.
+ * Set YUI_BAILS_NO_BANNER=1 to disable it (0 or false keep it on).
  */
 
 const ESC = '\x1b['
@@ -27,9 +27,13 @@ const gradientLine = (text: string, offset = 0) => {
 }
 
 /** version of Yui-Bails, shown in the banner */
-export const YUI_BAILS_VERSION = '1.4.0'
+export const YUI_BAILS_VERSION = '1.4.1'
 
 let printed = false
+
+/** `YUI_BAILS_NO_BANNER=1` turns the banner off; `0`, `false` or empty keep it on */
+export const bannerDisabled = (value = process.env.YUI_BAILS_NO_BANNER) =>
+	!!value && !['0', 'false', 'no', 'off'].includes(value.trim().toLowerCase())
 
 // "YUI" in block letters, 21 columns wide
 const LOGO = [
@@ -86,7 +90,7 @@ export const renderBanner = (version: string = YUI_BAILS_VERSION) => {
 }
 
 export const printBanner = (version: string = YUI_BAILS_VERSION) => {
-	if (printed || process.env.YUI_BAILS_NO_BANNER) {
+	if (printed || bannerDisabled()) {
 		return
 	}
 
@@ -112,7 +116,7 @@ export type WaVersionSource =
  * WhatsApp refuse to link a device.
  */
 export const printWaVersionNotice = ({ version, source }: { version: number[]; source: WaVersionSource }) => {
-	if (versionNoticePrinted || process.env.YUI_BAILS_NO_BANNER) {
+	if (versionNoticePrinted || bannerDisabled()) {
 		return
 	}
 
