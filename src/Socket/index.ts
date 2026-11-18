@@ -168,6 +168,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		},
 		{
 			groupMetadata: jid => sock.groupMetadata(jid),
+			newsletterMetadata: (type, key) => sock.newsletterMetadata(type, key),
 			sendPoll: (...args) => (sock as any).sendPoll(...args),
 			awaitReply: (...args) => replies.awaitReply(...args)
 		}

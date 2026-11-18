@@ -640,6 +640,52 @@ await restoreSession('./respaldo-2026-11-17.ysb', './sesion') // no sobrescribe:
 
 El respaldo contiene **tus credenciales**: quien lo tenga puede usar tu WhatsApp. Guárdalo en un lugar privado y nunca lo mandes por chat ni lo subas a GitHub. Al restaurar solo se aceptan nombres de archivo simples (nada de rutas con `..`).
 
+### Reconexión inteligente (`makeReconnector`)
+
+```js
+import { makeReconnector } from '@yui-bails/yui-bails'
+
+const reconnector = makeReconnector({
+  connect: iniciarBot, // la misma función que arranca tu bot
+  onRetry: ({ attempt, delayMs }) => console.log(`Reintento ${attempt} en ${delayMs} ms`),
+  onGiveUp: reason => console.log('No reconecto:', reason)
+})
+
+sock.ev.on('connection.update', update => reconnector.handle(update))
+```
+
+- Espera cada vez más (2 s, 4 s, 8 s… hasta 60 s) con un poco de azar para no reconectar todos al mismo segundo. Se ajusta con `baseDelayMs`, `maxDelayMs`, `jitter` y `maxRetries` (10 seguidos por defecto).
+- Una conexión que se mantiene abierta 30 s (`stableAfterMs`) cuenta como sana y reinicia la cuenta.
+- **No reintenta** cuando no sirve o hace daño: sesión cerrada desde el teléfono (`logged-out`), sesión abierta en otro lugar (`replaced`, si reintentas las dos se pelean), `bad-session` y `forbidden`. En esos casos llama a `onGiveUp`.
+- El reinicio que WhatsApp pide justo después de vincular (código 515) se hace de inmediato y no cuenta como fallo.
+- `reconnector.stop()` lo detiene si apagas el bot a propósito.
+
+### Sesión en un solo archivo (`useSingleFileAuthState`)
+
+Una carpeta con cientos de archivos pequeños es lenta, sobre todo en el teléfono. Esta guarda toda la sesión en **un** archivo:
+
+```js
+import { useSingleFileAuthState } from '@yui-bails/yui-bails'
+
+const { state, saveCreds, flush } = await useSingleFileAuthState('./sesion/auth.json')
+const sock = makeWASocket({ auth: state })
+sock.ev.on('creds.update', saveCreds)
+
+process.on('SIGINT', async () => { await flush(); process.exit(0) }) // guarda lo pendiente al apagar
+```
+
+- Los cambios se juntan y se escriben después de 500 ms (`saveDelayMs`); las credenciales se escriben al instante.
+- Cada escritura va a un archivo temporal que luego se renombra, así que un corte de luz no deja el archivo a medias. Si el archivo se daña y existe la copia `.bak` (se hace al abrir), la usa; si no hay copia, falla con un error claro en vez de crear una sesión nueva sin avisar.
+- Es un formato **nuevo**: no lee las carpetas de `useMultiFileAuthState`. Una sesión existente se queda como está; esto es para sesiones nuevas.
+- Sin dependencias nativas, así que funciona igual en Termux.
+
+### Info de un canal (`channelInfo`)
+
+```js
+const canal = await sock.channelInfo('https://whatsapp.com/channel/0029Va…') // enlace, código o 120363…@newsletter
+console.log(canal?.name, canal?.subscribers) // null si no existe
+```
+
 ## 🧠 Quiz y novedades experimentales
 
 Salen de campos que **existen en el protocolo de WhatsApp** pero que no hemos confirmado en todos los teléfonos y versiones: si WhatsApp no los soporta, el mensaje puede llegar como una encuesta o mensaje normal. Pruébalos en tu cuenta antes de ofrecerlos.

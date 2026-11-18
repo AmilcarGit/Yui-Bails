@@ -1,7 +1,8 @@
 import { Boom } from '@hapi/boom'
-import type { MessageRelayOptions, MiscMessageGenerationOptions, WAMessage } from '../Types'
+import type { MessageRelayOptions, MiscMessageGenerationOptions, NewsletterMetadata, WAMessage } from '../Types'
 import { WAProto } from '../Types'
 import type { BinaryNode } from '../WABinary'
+import { parseChannelKey } from './channel'
 import { generateMessageIDV2 } from './generics'
 import { htmlToWhatsApp } from './html-format'
 
@@ -26,6 +27,8 @@ export type ExtrasDeps = {
 	) => Promise<WAMessage | undefined>
 	/** members of a group (`sock.groupMetadata`); needed by `tagAll` */
 	groupMetadata?: (jid: string) => Promise<{ participants: Array<{ id: string }> }>
+	/** reads a channel (`sock.newsletterMetadata`); needed by `channelInfo` */
+	newsletterMetadata?: (type: 'invite' | 'jid', key: string) => Promise<NewsletterMetadata | null>
 	/** waits for the next message of a user (`sock.awaitReply`); needed by `ask` */
 	awaitReply?: (msg: WAMessage, options?: { timeoutMs?: number }) => Promise<WAMessage | undefined>
 }
@@ -361,6 +364,13 @@ export const makeSendExtras = (sock: ExtrasSocket, deps: ExtrasDeps = {}) => {
 			}
 
 			return status
+		},
+
+		/** Reads a channel from its link, invite code or id (`120363…@newsletter`). `null` when it does not exist. */
+		channelInfo: async (input: string) => {
+			if (!deps.newsletterMetadata) throw new Boom('This socket cannot read channels', { statusCode: 501 })
+			const { type, key } = parseChannelKey(input)
+			return deps.newsletterMetadata(type, key)
 		},
 
 		/**
