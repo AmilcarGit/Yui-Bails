@@ -24,11 +24,39 @@ Una bails profesional para tu bot de WhatsApp 👑
   <a href="#-qué-trae-yui-bails"><img src="https://img.shields.io/badge/%F0%9F%A7%B9_CONSOLA-LIMPIA-9d4edd?style=for-the-badge&labelColor=0d1117" alt="consola" /></a>
 </p>
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@yui-bails/yui-bails"><img src="https://img.shields.io/npm/v/@yui-bails/yui-bails?style=flat-square&logo=npm&label=npm&color=cb3837" alt="versión en npm" /></a>
+  <a href="https://www.npmjs.com/package/@yui-bails/yui-bails"><img src="https://img.shields.io/npm/dm/@yui-bails/yui-bails?style=flat-square&label=descargas%2Fmes" alt="descargas en npm" /></a>
+</p>
+
 <div align='center'>
 
 **Yui-Bails**, creada por **AmilcarGit**, es una librería WebSockets en TypeScript para la API de WhatsApp Web **optimizada para volar**: menos latencia, botones que sí se pintan, y una consola sin basura.
 
 </div>
+
+## 📦 Instalación (npm)
+
+Yui-Bails está publicada en npm como [`@yui-bails/yui-bails`](https://www.npmjs.com/package/@yui-bails/yui-bails). La insignia de arriba muestra siempre la última versión publicada.
+
+```bash
+# instalar (el alias "yui-bails:" te deja importar con el nombre corto)
+npm install yui-bails@npm:@yui-bails/yui-bails
+
+# actualizar a la última versión
+npm install yui-bails@npm:@yui-bails/yui-bails@latest
+```
+
+```js
+import makeWASocket from 'yui-bails'
+```
+
+Con **Termux**, si ves `E401` o `EALLOWGIT`:
+- Instalar y actualizar desde npm **no pide login**. El login (`npm login`) solo lo necesita quien **publica**.
+- `npm install github:AmilcarGit/Yui-Bails` lo bloquea npm por defecto; usa el comando de arriba (npm) o agrega `--allow-git=all` si de verdad quieres la versión de GitHub.
+- Para ver qué versión tienes instalada: `npm ls yui-bails`. Al arrancar, el banner también muestra la versión.
+
+**Versión de GitHub** (últimos cambios, sin garantía de estabilidad): `npm install yui-bails@github:AmilcarGit/Yui-Bails --allow-git=all`. Puede traer funciones que aún no están en npm.
 
 ## ⚡ ¿Qué trae Yui-Bails?
 
