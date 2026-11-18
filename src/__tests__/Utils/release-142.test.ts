@@ -236,9 +236,13 @@ describe('parseChannelKey / channelInfo', () => {
 	})
 
 	it('reads the channel through the socket', async () => {
-		const newsletterMetadata = jest.fn(async (_type: 'invite' | 'jid', _key: string) => null)
+		const newsletterMetadata = jest.fn(async (type: 'invite' | 'jid', key: string) => ({
+			id: `${type}:${key}`,
+			name: 'Canal'
+		}))
 		const extras = makeSendExtras({ sendMessage: jest.fn() as never }, { newsletterMetadata })
-		await extras.channelInfo('https://whatsapp.com/channel/0029VaABCdef12345')
+		const info = await extras.channelInfo('https://whatsapp.com/channel/0029VaABCdef12345')
+		expect(info?.name).toBe('Canal')
 		expect(newsletterMetadata).toHaveBeenCalledWith('invite', '0029VaABCdef12345')
 
 		const blind = makeSendExtras({ sendMessage: jest.fn() as never })
